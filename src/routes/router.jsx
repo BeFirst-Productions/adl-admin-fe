@@ -11,12 +11,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement';
 import PrivateRoute from '@/components/private/PrivateRoute';
+
 const Analytics = lazy(() => import('@/app/(admin)/dashboard/analytics/page'));
 const UserManagement = lazy(() => import('@/app/(admin)/ecommerce/sellers/page'));
 const UserCreation = lazy(() => import('@/app/(admin)/forms/basic/page'));
 const Blogs = lazy(() => import('@/app/(admin)/apps/contacts/page'));
 const EcommerceProductDetails = lazy(() => import('@/app/(admin)/ecommerce/products/[productId]/page'));
 const EcommerceProductCreate = lazy(() => import('@/app/(admin)/ecommerce/products/create/page'));
+const Invoices = lazy(() => import('@/app/(admin)/invoices/page'));
 
 const AppRouter = props => {
   const {
@@ -104,6 +106,20 @@ const AppRouter = props => {
           </AdminLayout>
         }
       />
-    </Routes></>)
+      <Route
+        path="/newsletter/subscribers"
+        element={
+          <AdminLayout>
+            <Invoices /> 
+          </AdminLayout>
+        }
+      />
+
+
+
+    </Routes>
+    
+    </>
+    )
 };
 export default AppRouter;
