@@ -134,7 +134,14 @@ const AppMenu = ({
       {(menuItems || []).map((item, idx) => {
       return <Fragment key={item.key + idx}>
             {item.isTitle ? <li className="menu-title">{item.label}</li> : <>
-                {item.children ? <MenuItemWithChildren item={item} toggleMenu={toggleMenu} className="nav-item" linkClassName={clsx('nav-link', getActiveClass(item))} subMenuClassName="nav sub-navbar-nav" activeMenuItems={activeMenuItems} /> : <MenuItem item={item} linkClassName={clsx('nav-link', getActiveClass(item))} className="nav-item" />}
+                {item.children ? <MenuItemWithChildren 
+                item={item} toggleMenu={toggleMenu} 
+                className="nav-item" 
+                linkClassName={clsx('nav-link', getActiveClass(item))} 
+                subMenuClassName="nav sub-navbar-nav" 
+                activeMenuItems={activeMenuItems} /> : <MenuItem 
+                item={item} 
+                linkClassName={clsx('nav-link', getActiveClass(item))} className="nav-item" />}
               </>}
           </Fragment>;
     })}
