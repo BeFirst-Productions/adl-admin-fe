@@ -1,81 +1,84 @@
 import { Button, Card, CardBody, Col, Row } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { lazy, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import PageBreadcrumb from "@/components/layout/PageBreadcrumb";
 import PageMetaData from "@/components/PageTitle";
 import IconifyIcon from "@/components/wrappers/IconifyIcon";
-import { getBlogs } from "@/api/apis";
-const EcommerceProductCreate = lazy(() => import('@/app/(admin)/ecommerce/products/create/page'));
+import { deleteBlog, getBlogs } from "@/api/apis";
+import DeleteConfrimModal from "../../Common/DeleteConfrimModal";
+import { toast } from "react-toastify";
 
-
-// ---------------------
-// Dummy Blog Data
-// ---------------------
-
-
-
-// ---------------------
-// Blog Card Component
-// ---------------------
-const BlogCard = ({ post, onDelete, onEdit,onView }) => {
-  const { title, image, excerpt, author, date, slug } = post;
+const BlogCard = ({ post, onDelete, onEdit, onView }) => {
+  const { title, image, excerpt, updatedAt, category } = post;
 
   return (
-    <Card className="h-100">
+    <Card className="h-100 shadow-sm border-0">
       <CardBody>
         <div className="text-center">
 
-          {/* Thumbnail */}
-          <img
-            src={image}
-            alt={title}
-            className="img-fluid rounded mb-3"
-            style={{ height: 180, objectFit: "cover", width: "100%" }}
-          />
+          {/* Image */}
+          <div className="position-relative">
+            <img
+              src={image}
+              alt={title}
+              className="img-fluid rounded mb-3"
+              style={{ height: 180, objectFit: "cover", width: "100%" }}
+            />
+
+            {/* Category Watermark */}
+            <span
+              className="badge bg-primary position-absolute"
+              style={{ top: 10, right: 10, padding: "8px 12px" }}
+            >
+              {category}
+            </span>
+          </div>
 
           {/* Title */}
-          <h4 className="fs-18 mt-2 text-dark">{title}</h4>
+          <h4 className="fs-18 mt-2 text-white fw-semibold">{title}</h4>
 
-          {/* Author + date */}
+          {/* Date */}
           <div className="text-muted small mb-2">
-            <IconifyIcon icon="mdi:account" className="me-1" />
-            {author}
-            {" • "}
             <IconifyIcon icon="mdi:calendar" className="me-1" />
-            {date}
+            {new Date(updatedAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
 
           {/* Excerpt */}
-          <p className="text-muted" style={{ minHeight: 60 }}>
+          <p className="text-white" style={{ minHeight: 60 }}>
             {excerpt}
           </p>
 
-          {/* ⭐ Learn More Button */}
-
-          {/* Edit + Delete Buttons */}
+          {/* Action Buttons */}
           <div className="d-flex justify-content-center gap-2 mt-2">
             <Button
               variant="soft-primary"
               size="sm"
+              className="px-3 py-2"
               onClick={() => onView(post)}
             >
-              <IconifyIcon icon="mdi:eye-outline" className="fs-18" />
+              <IconifyIcon icon="mdi:eye-outline" className="fs-20" />
             </Button>
 
             <Button
               variant="soft-primary"
               size="sm"
+              className="px-3 py-2"
               onClick={() => onEdit(post)}
             >
-              <IconifyIcon icon="bx:edit" className="fs-18" />
+              <IconifyIcon icon="bx:edit" className="fs-20" />
             </Button>
 
             <Button
               variant="soft-danger"
               size="sm"
+              className="px-3 py-2"
               onClick={() => onDelete(post)}
             >
-              <IconifyIcon icon="bx:trash" className="fs-18" />
+              <IconifyIcon icon="bx:trash" className="fs-20" />
             </Button>
           </div>
 
@@ -85,73 +88,150 @@ const BlogCard = ({ post, onDelete, onEdit,onView }) => {
   );
 };
 
-
-
-// ---------------------
-// Blog List Page
-// ---------------------
 const Blogs = () => {
   const [blogData, setBlogData] = useState([]);
-  const [addBlog, setAddBlog] = useState(false)
-  const [blogView, setBlogView] = useState(false)
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+
   const navigate = useNavigate();
-  const handleBlog = () => {
-    setAddBlog(!addBlog)
-  }
-  useEffect(() => {
-    const fetchBlog = async () => {
-      const response = await getBlogs();
 
-      if (response.success) {
-        setBlogData(response.data); // ← use fetched data
-      }
-    };
+  const categories = ["all", "service", "freezone", "visa"];
 
-    fetchBlog();
-  }, [addBlog]);
+  // Fetch Blogs
+  const fetchBlogs = async () => {
+    let url = `/?page=${page}&limit=8`;
 
+    if (categoryFilter !== "all") {
+      url += `&category=${encodeURIComponent(categoryFilter)}`;
+    }
 
-  const handleDeleteClick = (post) => {
-    setBlogData((prev) => prev.filter((item) => item.slug !== post.slug));
+    const response = await getBlogs(url);
+
+    if (response?.success) {
+      setBlogData(response.data);
+      setTotalPages(response.totalPages);
+    }
   };
 
-  const handleEditClick = (post) => {
-  navigate("/blogs/add-blog", { state: { blog: post } });
-};
+  useEffect(() => {
+    fetchBlogs();
+  }, [page, categoryFilter]);
 
-  const handleViewBlog = (blog) => {
-    navigate(`/blogs/details/${blog._id}`)
-    
-  }
+  // Handle delete
+  const handleDeleteClick = (post) => {
+    setDeleteModal(true);
+    setSelectedBlog(post);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+
+      const res = await deleteBlog(selectedBlog._id);
+
+      if (res.success) {
+        fetchBlogs();
+        toast.success(res.message);
+        setDeleteModal(false);
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <>
-      {/* Header with Add Blog button */}
+      {/* Header Section */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <PageBreadcrumb subName="Pages" title="Blog" />
 
-       <Button
-          variant="primary"
-          size="sm"
-          onClick={() => navigate("/blogs/add-blog")}
-        >
+        <Button variant="primary" size="sm" onClick={() => navigate("/blogs/add-blog")}>
           <IconifyIcon icon="bx:plus" className="me-1" /> Add Blog
         </Button>
       </div>
 
       <PageMetaData title="Blog" />
 
-       <Row className="row-cols-1 row-cols-md-2 row-cols-xl-4 gx-3">
-        {blogData?.map((post, idx) => (
-          <Col key={idx} className="mb-3">
-            <BlogCard
-              post={post}
-              onDelete={handleDeleteClick}
-              onEdit={handleEditClick}
-              onView={handleViewBlog}
-            />
+      {/* CATEGORY FILTER – BEAUTIFUL BADGE SELECTOR */}
+      <div className="mb-4">
+        <label className="form-label fw-bold fs-6">Filter by Category</label>
+        <div className="d-flex gap-2 flex-wrap mt-2">
+
+          {categories.map((cat) => (
+            <span
+              key={cat}
+              className={`badge rounded-pill px-3 py-2 cursor-pointer ${cat === categoryFilter ? "bg-primary text-white" : "bg-light text-dark border"
+                }`}
+              style={{ fontSize: "14px", cursor: "pointer" }}
+              onClick={() => {
+                setCategoryFilter(cat);
+                setPage(1);
+              }}
+            >
+              {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </span>
+          ))}
+
+        </div>
+      </div>
+
+      {/* BLOG LIST */}
+      <Row className="row-cols-1 row-cols-md-2 row-cols-xl-4 gx-3">
+        {blogData.length > 0 ? (
+          blogData.map((post) => (
+            <Col key={post._id} className="mb-3">
+              <BlogCard
+                post={post}
+                onDelete={handleDeleteClick}
+                onEdit={(p) => navigate(`/blogs/edit-blog/${p._id}`, { state: { blog: p } })}
+                onView={(p) => navigate(`/blogs/details/${p._id}`)}
+              />
+            </Col>
+          ))
+        ) : (
+          <Col xs={12} className="text-center py-5">
+            <p className="fs-5 fw-medium text-muted">No Blogs Found</p>
           </Col>
-        ))}
+        )}
       </Row>
+
+      {/* PAGINATION */}
+      {blogData.length > 0 && (
+        <div className="d-flex justify-content-center mt-4">
+          <ul className="pagination">
+            <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => setPage(page - 1)}>Previous</button>
+            </li>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li className={`page-item ${page === i + 1 ? "active" : ""}`} key={i}>
+                <button className="page-link" onClick={() => setPage(i + 1)}>
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+
+            <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+              <button className="page-link" onClick={() => setPage(page + 1)}>Next</button>
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteModal && (
+        <DeleteConfrimModal
+          confirmDelete={confirmDelete}
+          isDeleting={isDeleting}
+          handleModal={() => setDeleteModal(false)}
+          blogToDelete={selectedBlog}
+        />
+      )}
     </>
   );
 };

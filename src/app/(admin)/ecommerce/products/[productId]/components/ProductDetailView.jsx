@@ -1,106 +1,65 @@
 import IconifyIcon from '@/components/wrappers/IconifyIcon';
-import { currency } from '@/context/constants';
-import { getCalculatedPrice } from '@/helpers/product';
-import { getStockStatus } from '@/utils/other';
-import { Button } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-const ProductDetailView = ({
-  product
-}) => {
-  const {
-    title,
-    excerpt,
-    description
-  
-  } = product;
-   const navigate =useNavigate() 
-const stripHtml = (html) => {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return doc.body.textContent || "";
-};
-  return <div className="ps-xl-3 mt-3 mt-xl-0">
-      <h4 className="mb-3">{title}</h4>
-      {/* <p className="text-muted gap-1 d-flex float-start me-3">
-        {Array.from(new Array(Math.floor(review.stars))).map((_val, idx) => <IconifyIcon icon="fa6-solid:star" width={14} height={14} key={idx} className="text-base text-warning" />)}
-        {!Number.isInteger(review.stars) && <IconifyIcon icon="fa6-solid:star-half-stroke" width={14} height={14} className="text-warning" />}
-        {review.stars < 5 && Array.from(new Array(5 - Math.ceil(review.stars))).map((_val, idx) => <IconifyIcon icon="fa6-solid:star" key={idx} width={14} height={14} className="text-warning" />)}
-      </p> */}
-      {/* <p className="mb-3">
-        {' '}
-        <span className="text-muted">( {review.count} Customer Reviews )</span>
-      </p> */}
-      {/* <h4 className="mb-3">
-        Price :{' '}
-        <span className="text-muted me-2">
-          <del>{currency + price}</del>
-        </span>{' '}
-        <b>{currency + getCalculatedPrice(product)}</b>
-      </h4>
-      <h4>
-        <span className={`badge badge-soft-${stockStatus.variant} mb-3`}>{stockStatus.text}</span>
-      </h4> */}
-      {/* <form className="d-flex flex-wrap align-items-center mb-3">
-        <label className="my-1 me-2" htmlFor="color">
-          Color:
-        </label>
-        <div className="me-3">
-          <select className="form-select form-select-sm my-1" id="color">
-            <option value={1}>Black </option>
-            <option value={2}>Blue </option>
-            <option value={3}>Midnight </option>
-          </select>
+
+const ProductDetailView = ({ product }) => {
+  const { title, excerpt, description, category, subCategory } = product;
+  const navigate = useNavigate();
+
+  const stripHtml = (html) => {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent || "";
+  };
+
+  return (
+    <Card className="shadow-sm border-0 p-4">
+      <div className="ps-xl-3 mt-3 mt-xl-0">
+
+        {/* TITLE */}
+        <h2 className="fw-bold text-dark mb-3">{title}</h2>
+
+        {/* CATEGORY BADGES */}
+        <div className="d-flex gap-2 mb-3 flex-wrap">
+          <span className="badge px-3 py-2 bg-primary text-white">
+            <IconifyIcon icon="mdi:folder" className="me-1" />
+            {category}
+          </span>
+
+          <span className="badge px-3 py-2 bg-secondary text-white">
+            <IconifyIcon icon="mdi:subdirectory-arrow-right" className="me-1" />
+            {subCategory}
+          </span>
         </div>
-        <label className="my-1 me-2" htmlFor="sizeinput">
-          Size:
-        </label>
-        <div className="me-sm-3">
-          <select className="form-select form-select-sm my-1" id="sizeinput">
-            <option defaultChecked>256 GB</option>
-            <option value={1}>512 GB</option>
-          </select>
+
+        {/* EXCERPT */}
+        <div className="mb-4">
+          <h5 className="fw-semibold text-dark mb-2">Summary</h5>
+          <p className="text-white fs-4">{excerpt}</p>
         </div>
-      </form> */}
-      {/* <div className="mb-3 pb-3 border-bottom">
-        <h5>
-          Processor Brand : <span className="text-muted me-2" /> <b>Apple</b>
-        </h5>
-        <h5>
-          Processor Name : <span className="text-muted me-2" /> <b>M1</b>
-        </h5>
-        <h5>
-          SSD : <span className="text-muted me-2" /> <b>Yes</b>
-        </h5>
-        <h5>
-          SSD Capacity : <span className="text-muted me-2" /> <b>256 GB</b>
-        </h5>
-        <h5>
-          RAM : <span className="text-muted me-2" /> <b>8 GB</b>
-        </h5>
-      </div> */}
-      <div className="mb-3 flex-column d-flex">
-        {/* <h5>About this item:</h5> */}
-        <p className="text-muted mb-1 icons-center">
-         {excerpt}
-        </p>
-       <p className="text-muted mb-1 icons-center">
-  {stripHtml(description)}
-</p>
-        
-       
-       
-      
-       
+
+        {/* DESCRIPTION */}
+        <div className="mb-4">
+          <h5 className="fw-semibold text-dark mb-2">Full Description</h5>
+          <p className="text-white   fs-4" style={{ lineHeight: "1.7" }}>
+            {stripHtml(description)}
+          </p>
+        </div>
+
+        {/* ACTION BUTTONS */}
+        <div className="d-flex justify-content-center gap-2 mt-4">
+          <Button
+            onClick={() => navigate("/blogs")}
+            variant="danger"
+            type="button"
+            className="px-4 py-2 d-flex align-items-center gap-2"
+          >
+            <IconifyIcon icon="bx:x" className="fs-18" />
+            Close
+          </Button>
+        </div>
       </div>
-      <div className="d-flex gap-1">
-        <Button onClick={()=>navigate("/blogs")} variant="danger" type="button" className="me-2">
-          <IconifyIcon icon="bx:x" className="fs-18" />
-          Close
-        </Button>
-        {/* <Button variant="primary" type="button">
-          <IconifyIcon icon="bx:cart" className="fs-18 me-2" />
-          Add to cart
-        </Button> */}
-      </div>
-    </div>;
+    </Card>
+  );
 };
+
 export default ProductDetailView;

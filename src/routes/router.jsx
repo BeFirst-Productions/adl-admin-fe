@@ -7,10 +7,11 @@ import AdminLayout from '@/layouts/AdminLayout';
 import SignIn from '@/app/(other)/auth/sign-in/page';
 import { lazy } from 'react';
 import FAQManagement from '@/app/(admin)/faq/page';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement';
 import PrivateRoute from '@/components/private/PrivateRoute';
+import SeoLayout from '@/app/(admin)/seo/SeoLayout';
+const Cards = lazy(() => import('@/app/(admin)/ui/cards/page'));
 
 const Analytics = lazy(() => import('@/app/(admin)/dashboard/analytics/page'));
 const UserManagement = lazy(() => import('@/app/(admin)/ecommerce/sellers/page'));
@@ -25,22 +26,7 @@ const AppRouter = props => {
     isAuthenticated
   } = useAuthContext();
   return (<>
-    <ToastContainer
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="light"
-      style={{
-        zIndex: 9999,
-        fontSize: '14px'
-      }}
-    />
+   
 
     <Routes>
       <Route path="/login" element={<AuthLayout><SignIn /></AuthLayout>} />
@@ -107,19 +93,38 @@ const AppRouter = props => {
         }
       />
       <Route
-        path="/newsletter/subscribers"
+        path="/blogs/edit-blog/:blogId"
         element={
           <AdminLayout>
-            <Invoices /> 
+            <EcommerceProductCreate /> 
           </AdminLayout>
         }
       />
-
-
-
+      <Route
+      path="/newsletter/subscribers"
+        element={
+          <AdminLayout>
+            <Invoices /> 
+          </AdminLayout>}
+      />
+      <Route
+      path="/seo"
+        element={
+          <AdminLayout>
+            <SeoLayout /> 
+          </AdminLayout>}
+      />
+      <Route
+      path="/gallery"
+        element={
+          <AdminLayout>
+            <Cards /> 
+          </AdminLayout>}
+      />
     </Routes>
     
-    </>
-    )
+    </>)
+       
+  
 };
 export default AppRouter;

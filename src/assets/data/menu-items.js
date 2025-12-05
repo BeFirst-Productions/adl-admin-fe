@@ -82,6 +82,7 @@ export const MENU_ITEMS = [
     //   }
     // ]
   },
+ 
   // {
   //   key: 'faqs',
   //   icon: 'mdi:help-circle-outline',
@@ -92,9 +93,19 @@ export const MENU_ITEMS = [
     icon: 'mdi:help-circle-outline',
     label: 'Faqs',
     url: '/faqs',
-    //     parentKey: 'faqs'
-    //   }
-    // ]
+  },
+  {
+    key: 'gallery',
+    icon: 'mdi:image',
+    label: 'Gallery',
+    url: '/gallery',
+  },
+   {
+    key: 'seo',
+    icon: 'mdi:magnify-scan',
+    label: 'Seo',
+    url: '/seo',
+  
   },
 
   //  {
