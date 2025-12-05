@@ -333,12 +333,13 @@ const EnquiryManagement = () => {
                                         {/* RESET */}
                                         <Col md={2} className="d-flex align-items-end">
                                             <Button
-                                                variant="outline-secondary"
+                                                variant="outline-secondary text-primary hover-border"
                                                 className="w-100"
                                                 onClick={clearFilters}
                                                 disabled={loading}
                                             >
-                                                <IconifyIcon icon="bx:reset" />
+                                                {/* <IconifyIcon icon="bx:reset" /> */}
+                                                Reset
                                             </Button>
                                         </Col>
 
@@ -354,7 +355,7 @@ const EnquiryManagement = () => {
                                         <th>First Name</th>
                                         <th>Last Name</th>
                                         <th>Email</th>
-                                        <th>Status</th>
+                                        {/* <th>Status</th> */}
                                         <th>Date</th>
                                         <th>Actions</th>
                                     </tr>
@@ -376,7 +377,7 @@ const EnquiryManagement = () => {
                                                 <td><strong>{enquiry.firstName}</strong></td>
                                                 <td><strong>{enquiry.lastName}</strong></td>
                                                 <td><a href={`mailto:${enquiry.email}`}>{enquiry.email}</a></td>
-                                                <td>{getStatusBadge(enquiry.status)}</td>
+                                                {/* <td>{getStatusBadge(enquiry.status)}</td> */}
                                                 <td>{formatDate(enquiry.createdAt)}</td>
 
                                                 <td>
@@ -448,7 +449,7 @@ const EnquiryManagement = () => {
                             <Col md={6}><p><strong>First Name:</strong> {selectedEnquiry.firstName}</p></Col>
                             <Col md={6}><p><strong>Last Name:</strong> {selectedEnquiry.lastName}</p></Col>
                             <Col md={12}><p><strong>Email:</strong> {selectedEnquiry.email}</p></Col>
-                            <Col md={12}><p><strong>Status:</strong> {getStatusBadge(selectedEnquiry.status)}</p></Col>
+                            {/* <Col md={12}><p><strong>Status:</strong> {getStatusBadge(selectedEnquiry.status)}</p></Col> */}
                             <Col md={12}>
                                 <p><strong>Message:</strong></p>
                                 <div className="border p-3 rounded bg-light">

@@ -9,76 +9,101 @@ import { getSeo, saveSeo } from '@/api/apis';
 import { toast } from 'react-toastify';
 
 // =============================
-// PAGE + INNER PAGE LIST
+// SERVICES LIST (already done earlier)
+// =============================
+const SERVICES_LIST = [
+    { label: "Service Page", value: "Service Page" },
+  { label: "Company Formation", value: "company-formation-dubai" },
+  { label: "Golden Visa", value: "golden-visa-services-dubai" },
+  { label: "PRO Services", value: "pro-services-dubai" },
+  { label: "Local Sponsorship", value: "local-sponsorship-dubai" },
+  { label: "Visa Services", value: "visa-services-dubai" },
+  { label: "ISO & Trademark Services", value: "iso-and-trademark-services-dubai" },
+  { label: "Company Liquidation", value: "company-liquidation-dubai" },
+  { label: "Document Attestation", value: "document-attestation-dubai" },
+  { label: "Legal Translation", value: "legal-translation-dubai" },
+  { label: "Insurance & VAT Services", value: "insurance-vat-services-dubai" },
+  { label: "Corporate Bank Account Opening", value: "corporate-bank-account-opening-dubai" },
+  { label: "Typing Services", value: "typing-services-dubai" },
+  { label: "UAE Government Approvals", value: "uae-government-approvals-services" },
+  { label: "Medical & Emirates ID Services", value: "medical-emirates-id-services-dubai" },
+  { label: "Freezone Company Setup", value: "freezone-company-setup-dubai" },
+  { label: "Dubai Court Services", value: "dubai-court-services" },
+  { label: "Online MOA & POA Services", value: "online-moa-poa-services-dubai" },
+  { label: "Virtual Office", value: "virtual-office-dubai" },
+];
+
+// =============================
+// FREEZONE LIST
+// =============================
+const FREEZONE_LIST = [
+  { label: "Freezone Page", value: "uae-freezone-business-setup" },
+  { label: "IFZA Freezone Dubai", value: "ifza-freezone-dubai" },
+  { label: "JAFZA Freezone Dubai", value: "jafza-freezone-dubai" },
+  { label: "Meydan Freezone Dubai", value: "meydan-freezone-dubai" },
+  { label: "Dubai South Freezone", value: "dubai-south-freezone" },
+  { label: "DAFZA Freezone Dubai", value: "dafza-freezone-dubai" },
+  { label: "Dubai Media Internet D3 DIFC", value: "dubai-media-internet-d3-difc" },
+  { label: "ADGM Abu Dhabi", value: "adgm-abu-dhabi" },
+  { label: "KIZAD Abu Dhabi", value: "kizad-abu-dhabi" },
+  { label: "Masdar City Freezone Abu Dhabi", value: "masdar-city-freezone-abu-dhabi" },
+  { label: "Twofour54 Abu Dhabi", value: "twofour54-abu-dhabi" },
+  { label: "SAIF Zone Sharjah", value: "saif-zone-sharjah" },
+  { label: "Hamriyah Free Zone Sharjah", value: "hamriyah-free-zone-sharjah" },
+  { label: "Shams Sharjah", value: "shams-sharjah" },
+  { label: "SPCFZ Sharjah Publishing City", value: "spcfz-sharjah-publishing-city" },
+  { label: "RAKEZ Ras Al Khaimah", value: "rakez-ras-al-khaimah" },
+  { label: "RAK Maritime City", value: "rak-maritime-city" },
+  { label: "AFZ Ajman", value: "afz-ajman" },
+  { label: "Ajman Media City", value: "ajman-media-city" },
+  { label: "Fujairah Free Zone", value: "fujairah-free-zone" },
+  { label: "Fujairah Creative City", value: "fujairah-creative-city" },
+  { label: "UAQ Free Trade Zone", value: "uaq-free-trade-zone" },
+];
+
+// =============================
+// LICENSE LIST
+// =============================
+const LICENSE_LIST = [
+  { label: "Commercial License", value: "commercial-license" },
+  { label: "Professional License", value: "professional-license" },
+  { label: "Industrial License", value: "industrial-license" },
+  { label: "Tourism License", value: "tourism-license" },
+  { label: "E-Trader License", value: "e-trader-license" },
+  { label: "Freelance Permit", value: "freelance-permit" },
+];
+
+// =============================
+// VISA LIST
+// =============================
+const VISA_LIST = [
+  { label: "Golden Visa", value: "golden-visa" },
+  { label: "Green Visa", value: "green-visa" },
+  { label: "Employment Visa", value: "employment-visa" },
+  { label: "Family Visa", value: "family-visa" },
+  { label: "Investor Visa", value: "investor-visa" },
+  { label: "Freelance Visa", value: "freelance-visa" },
+  { label: "Blue Visa", value: "blue-visa" },
+];
+
+// =============================
+// PAGE OPTIONS (FINAL)
 // =============================
 const PAGE_OPTIONS = {
   home: [],
   about: [],
-  services: [
-    "Service Page",
-    "Company Formation",
-    "Golden Visa",
-    "PRO Services",
-    "Local Sponsorship",
-    "Visa Services",
-    "ISO Certification & Trademark Registration",
-    "Virtual Office",
-    "Company Liquidation",
-    "Document Attestation",
-    "Legal Translation",
-    "Insurance & VAT Services",
-    "Bank Account Opening",
-    "Typing Services",
-    "UAE Government Approvals",
-    "Medical & Emirates ID Services",
-    "FREEZONE",
-    "Dubai Court Services",
-    "Online MOA & POA Services"
-  ],
-  freezone: [
-    "Ifza Freezone Dubai",
-    "Jafza Freezone Dubai",
-    "Meydan Freezone Dubai",
-    "Dubai South Freezone",
-    "Dafza Freezone Dubai",
-    "Dubai Media Internet D3 Difc",
-    "Adgm Abu Dhabi",
-    "Kizad Abu Dhabi",
-    "Masdar City Freezone Abu Dhabi",
-    "Twofour54 Abu Dhabi",
-    "Saif Zone Sharjah",
-    "Hamriyah Free Zone Sharjah",
-    "Shams Sharjah",
-    "Spcfz Sharjah Publishing City",
-    "Rakez Ras Al Khaimah",
-    "Rak Maritime City",
-    "Afz Ajman",
-    "Ajman Media City",
-    "Fujairah Free Zone",
-    "Fujairah Creative City",
-    "Uaq Free Trade Zone"
-  ],
+  services: SERVICES_LIST,
+  freezone: FREEZONE_LIST,
+  visa: VISA_LIST,
+  license: LICENSE_LIST,
   mainland: [],
-  visa: [
-    "Employment Visa",
-    "Investor Visa",
-    "Family Visa",
-    "Golden Visa",
-    "Freelance Visa",
-    "Green Visa",
-    "Blue Visa"
-  ],
-  license: [
-    "Commercial License",
-    "Professional License",
-    "Industrial License",
-    "Tourism License",
-    "E-Trader License",
-    "Freelance Permit"
-  ],
   gallery: [],
   blog: [],
   contact: [],
+  offshore: [],
+  privacy: [],
+  terms:[],
+  faqs:[]
 };
 
 // =============================
@@ -134,7 +159,6 @@ const SeoLayout = forwardRef((props, ref) => {
     setInnerPages(PAGE_OPTIONS["home"]);
   }, []);
 
-  // Add keywords
   const addKeywords = (value) => {
     const keywords = value
       .split(",")
@@ -144,14 +168,12 @@ const SeoLayout = forwardRef((props, ref) => {
     setKeywordList(keywords);
   };
 
-  // Remove keyword
   const removeKeyword = (kw) => {
     const updated = keywordList.filter((k) => k !== kw);
     setKeywordList(updated);
     setValue("keywords", updated.join(", "));
   };
 
-  // Clear all SEO fields
   const clearSeoFields = () => {
     setValue("title", "");
     setValue("keywords", "");
@@ -160,7 +182,6 @@ const SeoLayout = forwardRef((props, ref) => {
     setKeywordList([]);
   };
 
-  // Page selection handler
   const handlePageChange = (e) => {
     const page = e.target.value;
 
@@ -171,7 +192,6 @@ const SeoLayout = forwardRef((props, ref) => {
     clearSeoFields();
   };
 
-  // Inner Page selection handler
   const handleInnerPageChange = (e) => {
     const inner = e.target.value;
 
@@ -179,7 +199,7 @@ const SeoLayout = forwardRef((props, ref) => {
     clearSeoFields();
   };
 
-  // Load SEO when page / innerPage changes
+  // Load SEO based on page + innerPage
   useEffect(() => {
     if (!selectedPage) return;
 
@@ -204,7 +224,6 @@ const SeoLayout = forwardRef((props, ref) => {
     loadSeo();
   }, [selectedPage, selectedInnerPage]);
 
-  // SUBMIT
   const onSubmit = async (data) => {
     try {
       setIsSaving(true);
@@ -266,7 +285,9 @@ const SeoLayout = forwardRef((props, ref) => {
               >
                 <option value="">Select Inner Page</option>
                 {innerPages.map((inner, i) => (
-                  <option key={i} value={inner}>{inner}</option>
+                  <option key={i} value={inner.value}>
+                    {inner.label}
+                  </option>
                 ))}
               </select>
               {errors.innerPage && <p className="text-danger small">{errors.innerPage.message}</p>}
@@ -303,7 +324,6 @@ const SeoLayout = forwardRef((props, ref) => {
                 }}
               />
 
-              {/* KEYWORD TAGS */}
               <div className="d-flex gap-2 flex-wrap mt-2">
                 {keywordList.map((kw, i) => (
                   <span
@@ -355,7 +375,7 @@ const SeoLayout = forwardRef((props, ref) => {
         </Card.Body>
       </Card>
 
-      {/* SUBMIT BUTTON */}
+      {/* SUBMIT */}
       <div className="d-flex justify-content-end mt-3">
         <Button type="submit" variant="primary" disabled={isSaving}>
           {isSaving ? "Saving..." : "Save SEO Data"}
