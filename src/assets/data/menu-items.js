@@ -4,44 +4,53 @@ export const MENU_ITEMS = [
     label: 'GENERAL',
     isTitle: true,
   },
-  {
-    key: 'dashboards',
-    icon: 'iconamoon:home-duotone',
-    label: 'Dashboards',
-    children: [
+  // {
+  //   key: 'dashboards',
+  //   icon: 'iconamoon:home-duotone',
+  //   label: 'Dashboards',
+  //   children: [
       {
+        key: 'dashboard',
+        icon: 'iconamoon:apps-bold',
+        label: 'Dashboard',
+        url: '/',
+        // parentKey: 'dashboards',
+      },
+            {
         key: 'dashboard-analytics',
+        icon: 'carbon:analytics',
         label: 'Analytics',
-        url: '/dashboard/analytics',
-        parentKey: 'dashboards',
+        url: '/analytics',
+        // parentKey: 'dashboards',
       },
-      {
-        key: 'dashboard-finance',
-        label: 'Finance',
-        url: '/dashboard/finance',
-        parentKey: 'dashboards',
-      },
-      {
-        key: 'dashboard-sales',
-        label: 'Sales',
-        url: '/dashboard/sales',
-        parentKey: 'dashboards',
-      },
-    ],
-  },
-  {
-    key: 'users',
-    icon: 'mdi:account-group',
-    label: 'Users',
-    children: [
+  //     {
+  //       key: 'dashboard-finance',
+  //       label: 'Finance',
+  //       url: '/dashboard/finance',
+  //       parentKey: 'dashboards',
+  //     },
+  //     {
+  //       key: 'dashboard-sales',
+  //       label: 'Sales',
+  //       url: '/dashboard/sales',
+  //       parentKey: 'dashboards',
+  //     },
+  //   ],
+  // },
+  // {
+  //   key: 'users',
+  //   icon: 'mdi:account-group',
+  //   label: 'Users',
+  //   children: [
       {
         key: 'user-management',
-        label: 'User Management',
+        label: 'Users',
         url: '/user-management',
-        parentKey: 'users',
+        icon: 'mdi:account-group',
+        // parentKey: 'users',
       },
-    ],
-  },
+  //   ],
+  // },
   // {
   //   key: 'enquiry',
   //   icon: 'mdi:message-text-outline',
@@ -109,7 +118,7 @@ export const MENU_ITEMS = [
   },
   {
       key: 'page-packages',
-      icon: 'mdi:Box',
+      icon: 'iconamoon:box-bold',
       label: 'Packages',
       url: '/packages',
     

@@ -134,7 +134,7 @@ const initialRoutes = [{
   element: <NotFound />
 }];
 const generalRoutes = [{
-  path: '/dashboard/analytics',
+  path: '/analytics',
   name: 'Analytics',
   element: <Analytics />
 }, {
