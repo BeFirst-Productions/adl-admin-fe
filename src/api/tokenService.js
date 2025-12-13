@@ -1,4 +1,3 @@
-// tokenService.js
 let accessToken = null;
 
 export const setAccessToken = (token) => {
@@ -6,4 +5,7 @@ export const setAccessToken = (token) => {
 };
 
 export const getAccessToken = () => accessToken;
-    
+
+export const clearAccessToken = () => {
+  accessToken = null;
+};

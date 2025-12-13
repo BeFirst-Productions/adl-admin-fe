@@ -30,17 +30,15 @@ export const MENU_ITEMS = [
     ],
   },
   {
-    key: 'users',
-    icon: 'mdi:account-group',
-    label: 'Users',
-    children: [
-      {
-        key: 'user-management',
-        label: 'User Management',
-        url: '/user-management',
-        parentKey: 'users',
-      },
-    ],
+
+
+    key: 'user-management',
+    icon: 'mdi:user',
+
+    label: 'User Management',
+    url: '/user-management',
+
+
   },
   // {
   //   key: 'enquiry',
@@ -74,15 +72,24 @@ export const MENU_ITEMS = [
   //   label: 'Blogs',
   //   children: [
   {
+    key: 'herosection',
+    icon: 'mdi:home-outline',
+    label: 'Herosection',
+    url: '/herosection',
+    //     parentKey: 'blogs'
+    //   }
+    // ]
+  },
+  {
     key: 'blogs',
-    icon: 'mdi:message-text-outline',
+    icon: 'mdi:post-outline',
     label: 'Blogs',
     url: '/blogs',
     //     parentKey: 'blogs'
     //   }
     // ]
   },
- 
+
   // {
   //   key: 'faqs',
   //   icon: 'mdi:help-circle-outline',
@@ -100,12 +107,12 @@ export const MENU_ITEMS = [
     label: 'Gallery',
     url: '/gallery',
   },
-   {
+  {
     key: 'seo',
     icon: 'mdi:magnify-scan',
     label: 'Seo',
     url: '/seo',
-  
+
   },
 
   //  {

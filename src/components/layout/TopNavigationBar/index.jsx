@@ -15,7 +15,7 @@ const TopNavigationBar = () => {
           <div className="d-flex align-items-center gap-2">
             <LeftSideBarToggle />
 
-            <SearchBox />
+            {/* <SearchBox /> */}
           </div>
           <div className="d-flex align-items-center gap-1">
             {/* Toggle Theme Mode */}

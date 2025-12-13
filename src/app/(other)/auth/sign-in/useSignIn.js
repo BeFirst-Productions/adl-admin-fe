@@ -5,10 +5,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
-import httpClient from '@/helpers/httpClient';
 import { signIn } from '@/api/apis';
+import { useAuth } from '@/context/AuthContext';
 const useSignIn = () => {
   const [loading, setLoading] = useState(false);
+   const { logIn } = useAuth();
   const navigate = useNavigate();
   const {
     saveSession
@@ -36,25 +37,27 @@ const useSignIn = () => {
     if (redirectLink) navigate(redirectLink);else navigate('/');
   };
   const login = handleSubmit(async values => {
-    try {
-      const res = await signIn(values)
-      
-      if (res.data.success) {
+    const res = await logIn(values)  
+        console.log(res);
         
-        navigate('/user-management')
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e) {
-      if (e.response?.data?.error) {
-        showNotification({
-          message: e.response?.data?.error,
-          variant: 'danger'
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  });
+    // try {
+    //   if (res.success) {
+        
+    //     navigate('/user-management')
+    //   }
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // } catch (e) {
+    //   if (e.response?.data?.error) {
+    //     showNotification({
+    //       message: e.response?.data?.error,
+    //       variant: 'danger'
+    //     });
+    //   }
+    // } finally {
+    //   setLoading(false);
+    // }
+  }
+);
   return {
     loading,
     login,

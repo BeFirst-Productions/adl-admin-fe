@@ -25,10 +25,10 @@ const ProductDetailView = ({ product }) => {
             {category}
           </span>
 
-          <span className="badge px-3 py-2 bg-secondary text-white">
+         {subCategory&& <span className="badge px-3 py-2 bg-secondary text-white">
             <IconifyIcon icon="mdi:subdirectory-arrow-right" className="me-1" />
             {subCategory}
-          </span>
+          </span>}
         </div>
 
         {/* EXCERPT */}
@@ -39,11 +39,14 @@ const ProductDetailView = ({ product }) => {
 
         {/* DESCRIPTION */}
         <div className="mb-4">
-          <h5 className="fw-semibold text-dark mb-2">Full Description</h5>
-          <p className="text-white   fs-4" style={{ lineHeight: "1.7" }}>
-            {stripHtml(description)}
-          </p>
-        </div>
+  <h5 className="fw-semibold text-dark mb-2">Full Description</h5>
+
+  <div
+    className="text-white fs-4"
+    style={{ lineHeight: "1.7" }}
+    dangerouslySetInnerHTML={{ __html:description }}
+  />
+</div>
 
         {/* ACTION BUTTONS */}
         <div className="d-flex justify-content-center gap-2 mt-4">

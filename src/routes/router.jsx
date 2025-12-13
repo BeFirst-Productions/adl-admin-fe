@@ -11,6 +11,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement';
 import PrivateRoute from '@/components/private/PrivateRoute';
 import SeoLayout from '@/app/(admin)/seo/SeoLayout';
+import ProtectedRoute from './ProtectedRoute';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import LoginProtectRoute from './LoginProtectRoute';
+import HeroSectionManagement from '@/app/(admin)/HeroSection/HeroSectionManagement';
 const Cards = lazy(() => import('@/app/(admin)/ui/cards/page'));
 
 const Analytics = lazy(() => import('@/app/(admin)/dashboard/analytics/page'));
@@ -26,105 +30,146 @@ const AppRouter = props => {
     isAuthenticated
   } = useAuthContext();
   return (<>
-   
 
-    <Routes>
-      <Route path="/login" element={<AuthLayout><SignIn /></AuthLayout>} />
-      <Route path="/" element={<AdminLayout><Analytics /></AdminLayout>} />
+    <AuthProvider>
 
-      <Route
-        path="/user-management"
-        element={
-          <AdminLayout>
+      <Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
 
-            <UserManagement />
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/user-management/add"
-        element={
-          <AdminLayout>
+        <Route path="/login" element={<LoginProtectRoute><AuthLayout><SignIn /></AuthLayout></LoginProtectRoute>} />
+        <Route path="/" element={<ProtectedRoute>
+          <AdminLayout><Analytics /></AdminLayout></ProtectedRoute>} />
 
-            <UserCreation />
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/faqs"
-        element={
-          <AdminLayout>
+        <Route
+          path="/user-management"
+          element={
+            <ProtectedRoute allowedRoles={["superadmin"]}>
+              <AdminLayout>
+                <UserManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user-management/add"
+          element={
+            <ProtectedRoute allowedRoles={["superadmin"]}>
 
-            <FAQManagement />
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/enquiry"
-        element={
-          <AdminLayout>
+              <AdminLayout>
 
-            <EnquiryManagement />
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/blogs"
-        element={
-          <AdminLayout>
-            <Blogs />
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/blogs/details/:blogId"
-        element={
-          <AdminLayout>
-            <EcommerceProductDetails /> 
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/blogs/add-blog"
-        element={
-          <AdminLayout>
-            <EcommerceProductCreate /> 
-          </AdminLayout>
-        }
-      />
-      <Route
-        path="/blogs/edit-blog/:blogId"
-        element={
-          <AdminLayout>
-            <EcommerceProductCreate /> 
-          </AdminLayout>
-        }
-      />
-      <Route
-      path="/newsletter/subscribers"
-        element={
-          <AdminLayout>
-            <Invoices /> 
-          </AdminLayout>}
-      />
-      <Route
-      path="/seo"
-        element={
-          <AdminLayout>
-            <SeoLayout /> 
-          </AdminLayout>}
-      />
-      <Route
-      path="/gallery"
-        element={
-          <AdminLayout>
-            <Cards /> 
-          </AdminLayout>}
-      />
-    </Routes>
-    
-    </>)
-       
-  
+                <UserCreation />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/faqs"
+          element={
+            <ProtectedRoute>
+
+              <AdminLayout>
+
+                <FAQManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/enquiry"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+
+                <EnquiryManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blogs"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <Blogs />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blogs/details/:blogId"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductDetails />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blogs/add-blog"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductCreate />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/blogs/edit-blog/:blogId"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductCreate />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/newsletter/subscribers"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <Invoices />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seo"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <SeoLayout />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gallery"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <Cards />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/herosection"
+          element={
+            <ProtectedRoute allowedRoles={["superadmin"]}>
+              <AdminLayout>
+                <HeroSectionManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </AuthProvider>
+
+  </>)
+
+
 };
 export default AppRouter;

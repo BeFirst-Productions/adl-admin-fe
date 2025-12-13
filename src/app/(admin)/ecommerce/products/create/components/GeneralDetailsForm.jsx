@@ -17,90 +17,117 @@ const generalFormSchema = yup.object({
   name: yup.string().required('Blog title is required'),
   reference: yup.string().required('Excerpt is required'),
   description: yup.string().required('Description is required'),
-  category: yup.string().required('Category is required'),
-  subCategory: yup.string().required('Sub Category is required'),
+  category: yup.string().required('Page is required'),
+
+  subCategory: yup.string().when("category", {
+is: (val) => val !== "blog" ,
+    then: (schema) => schema.required("Innerpage is required"),
+    otherwise: (schema) => schema.optional(),
+  }),
+
+  url: yup
+    .string()
+    .required("URL is required")
+    .matches(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens allowed"),
 });
 
+
 const categories = [
+  // ✅ SERVICES
   {
     id: "service",
     name: "Services",
     subcategories: [
-      "Company Formation",
-      "Golden Visa",
-      "PRO Services",
-      "Local Sponsorship",
-      "Visa Services",
-      "ISO Certification & Trademark Registration",
-      "Virtual Office",
-      "Company Liquidation",
-      "Document Attestation",
-      "Legal Translation",
-      "Insurance & VAT Services",
-      "Bank Account Opening",
-      "Typing Services",
-      "UAE Government Approvals",
-      "Medical & Emirates ID Services",
-      "FREEZONE",
-      "Dubai Court Services",
-      "Online MOA & POA Services"
+      { name: "Company Formation", path: "/company-formation-dubai" },
+      { name: "Golden Visa", path: "/golden-visa-services-dubai" },
+      { name: "PRO Services", path: "/pro-services-dubai" },
+      { name: "Local Sponsorship", path: "/local-sponsorship-dubai" },
+      { name: "Visa Services", path: "/visa-services-dubai" },
+      { name: "ISO Certification & Trademark Registration", path: "/iso-and-trademark-services-dubai" },
+      { name: "Virtual Office", path: "/virtual-office-dubai" },
+      { name: "Company Liquidation", path: "/company-liquidation-dubai" },
+      { name: "Document Attestation", path: "/document-attestation-dubai" },
+      { name: "Legal Translation", path: "/legal-translation-dubai" },
+      { name: "Insurance & VAT Services", path: "/insurance-vat-services-dubai" },
+      { name: "Bank Account Opening", path: "/corporate-bank-account-opening-dubai" },
+      { name: "Typing Services", path: "/typing-services-dubai" },
+      { name: "UAE Government Approvals", path: "/uae-government-approvals-services" },
+      { name: "Medical & Emirates ID Services", path: "/medical-emirates-id-services-dubai" },
+      { name: "FREEZONE", path: "/freezone-company-setup-dubai" },
+      { name: "Dubai Court Services", path: "/dubai-court-services" },
+      { name: "Online MOA & POA Services", path: "/online-moa-poa-services-dubai" },
     ],
   },
-  {
-    id: "visa",
-    name: "Visa",
-    subcategories: [
-      "Employment Visa",
-      "Investor Visa",
-      "Family Visa",
-      "Golden Visa",
-      "Freelance Visa",
-      "Green Visa",
-      "Blue Visa"
-    ],
-  },
+
+  // ✅ LICENSE
   {
     id: "license",
     name: "License",
     subcategories: [
-      "Commercial License",
-      "Professional License",
-      "Industrial License",
-      "Tourism License",
-      "E-Trader License",
-      "Freelance Permit"
+      { name: "Commercial License", path: "/commercial-license" },
+      { name: "Professional License", path: "/professional-license" },
+      { name: "Industrial License", path: "/industrial-license" },
+      { name: "Tourism License", path: "/tourism-license" },
+      { name: "E-Trader License", path: "/e-trader-license" },
+      { name: "Freelance Permit", path: "/freelance-permit" },
     ],
   },
+
+  // ✅ VISA  
+  {
+    id: "visa",
+    name: "Visa",
+    subcategories: [
+      { name: "Employment Visa", path: "/employment-visa" },
+      { name: "Investor Visa", path: "/investor-visa" },
+      { name: "Family Visa", path: "/family-visa" },
+      { name: "Golden Visa", path: "/golden-visa" },
+      { name: "Freelance Visa", path: "/freelance-visa" },
+      { name: "Green Visa", path: "/green-visa" },
+      { name: "Blue Visa", path: "/blue-visa" },
+    ],
+  },
+
   {
     id: "freezone",
     name: "Freezone",
-    subcategories: [
-      "Ifza Freezone Dubai",
-      "Jafza Freezone Dubai",
-      "Meydan Freezone Dubai",
-      "Dubai South Freezone",
-      "Dafza Freezone Dubai",
-      "Dubai Media Internet D3 Difc",
-      "Adgm Abu Dhabi",
-      "Kizad Abu Dhabi",
-      "Masdar City Freezone Abu Dhabi",
-      "Twofour54 Abu Dhabi",
-      "Saif Zone Sharjah",
-      "Hamriyah Free Zone Sharjah",
-      "Shams Sharjah",
-      "Spcfz Sharjah Publishing City",
-      "Rakez Ras Al Khaimah",
-      "Rak Maritime City",
-      "Afz Ajman",
-      "Ajman Media City",
-      "Fujairah Free Zone",
-      "Fujairah Creative City",
-      "Uaq Free Trade Zone"
-    ],
-  }
+    subcategories: [ { name: "Freezone Page", path: "/freezone" },]
+
+    // [
+    //   { name: "Ifza Freezone Dubai", path: "/ifza-freezone-dubai" },
+    //   { name: "Jafza Freezone Dubai", path: "/jafza-freezone-dubai" },
+    //   { name: "Meydan Freezone Dubai", path: "/meydan-freezone-dubai" },
+    //   { name: "Dubai South Freezone", path: "/dubai-south-freezone" },
+    //   { name: "Dafza Freezone Dubai", path: "/dafza-freezone-dubai" },
+    //   { name: "Dubai Media Internet D3 Difc", path: "/dubai-media-internet-d3-difc" },
+    //   { name: "Adgm Abu Dhabi", path: "/adgm-abu-dhabi" },
+    //   { name: "Kizad Abu Dhabi", path: "/kizad-abu-dhabi" },
+    //   { name: "Masdar City Freezone Abu Dhabi", path: "/masdar-city-freezone-abu-dhabi" },
+    //   { name: "Twofour54 Abu Dhabi", path: "/twofour54-abu-dhabi" },
+    //   { name: "Saif Zone Sharjah", path: "/saif-zone-sharjah" },
+    //   { name: "Hamriyah Free Zone Sharjah", path: "/hamriyah-free-zone-sharjah" },
+    //   { name: "Shams Sharjah", path: "/shams-sharjah" },
+    //   { name: "Spcfz Sharjah Publishing City", path: "/spcfz-sharjah-publishing-city" },
+    //   { name: "Rakez Ras Al Khaimah", path: "/rakez-ras-al-khaimah" },
+    //   { name: "Rak Maritime City", path: "/rak-maritime-city" },
+    //   { name: "Afz Ajman", path: "/afz-ajman" },
+    //   { name: "Ajman Media City", path: "/ajman-media-city" },
+    //   { name: "Fujairah Free Zone", path: "/fujairah-free-zone" },
+    //   { name: "Fujairah Creative City", path: "/fujairah-creative-city" },
+    //   { name: "Uaq Free Trade Zone", path: "/uaq-free-trade-zone" },
+    // ]
+
+  },
+
+  {
+    id: "blog",
+    name: "Blog",
+    subcategories: [],
+  },
 ];
 
-const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
+
+const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData,formErrors }, ref) => {
   const initialLoad = useRef(false);
 
   const {
@@ -111,7 +138,7 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
     setValue,
     register,
     trigger,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(generalFormSchema),
     defaultValues: {
@@ -119,8 +146,9 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
       reference: "",
       description: "",
       category: "",
-      subCategory: ""
-    }
+      subCategory: "",
+      url: ""
+    },
   });
 
   const [productDescriptionContent, setProductDescriptionContent] = useState("");
@@ -128,9 +156,9 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
   // Expose validateStep() to parent
   useImperativeHandle(ref, () => ({
     validateStep: async () => {
-      const isValid = await trigger();  // triggers Yup + RHF validation
+      const isValid = await trigger();
       return isValid;
-    }
+    },
   }));
 
   // Load initial data (edit mode)
@@ -141,7 +169,8 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
         reference: blogData.excerpt || "",
         description: blogData.description || "",
         category: blogData.category || "",
-        subCategory: blogData.subCategory || ""
+        subCategory: blogData.subCategory || "",
+        url: blogData.url || ""   // ✅ INCLUDED IN RESET
       });
 
       setProductDescriptionContent(blogData.description || "");
@@ -149,7 +178,7 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
     }
   }, [blogData, reset]);
 
-  // Sync parent data from form fields except description
+  // Sync parent data from form fields except description (handled separately)
   useEffect(() => {
     const sub = watch((values) => {
       updateBlogData({
@@ -157,6 +186,7 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
         excerpt: values.reference,
         category: values.category,
         subCategory: values.subCategory,
+        url: values.url,   // ✅ INCLUDED IN SYNC
       });
     });
 
@@ -206,63 +236,101 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
         </Col>
       </Row>
 
+      {/* URL NAME FIELD */}
+      <Row>
+        <Col lg={6}>
+          <TextFormInput
+            control={control}
+            name="url"
+            placeholder="Enter URL "
+            label="URL Name"
+            containerClassName="mb-3"
+            id="url-name"
+          />
+
+        {formErrors?.url && (
+  <p className="text-danger small">{formErrors.url}</p>
+)}
+        </Col>
+
+      </Row>
+
       {/* CATEGORY */}
       <Row>
         <Col lg={6}>
-          <label className="form-label fw-bold">Category</label>
+          <label className="form-label fw-bold">Pages</label>
 
           <div className="d-flex gap-3 flex-wrap mb-3">
-            {categories.map(cat => {
+            {categories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
 
               return (
                 <label
                   key={cat.id}
-                  className={`p-2 px-3 rounded border ${isSelected ? "bg-primary text-white" : "bg-light text-muted"}`}
+                  className={`p-2 px-3 rounded border ${isSelected ? "bg-primary text-white" : "bg-light text-muted"
+                    }`}
                   style={{ cursor: "pointer" }}
                 >
-                  <input type="radio" {...register("category")} value={cat.id} className="me-2" />
+                  <input
+                    type="radio"
+                    {...register("category")}
+                    value={cat.id}
+                    className="me-2"
+                  />
                   {cat.name}
                 </label>
               );
             })}
           </div>
+          {errors.category && (
+            <p className="text-danger small">{errors.category.message}</p>
+          )}
 
-          {errors.category && <p className="text-danger small">{errors.category.message}</p>}
         </Col>
 
         {/* SUBCATEGORY */}
         <Col lg={6}>
-  <label className="form-label fw-bold">Sub Category</label>
+          <label className="form-label fw-bold">Innerpages</label>
+          <select
+            className={`form-select mb-3 ${errors.subCategory ? "is-invalid" : ""}`}
+            {...register("subCategory")}
+            disabled={!selectedCategory}
+          >
+            <option value="">Select Sub Category</option>
 
-  <select
-    className={`form-select mb-3 ${errors.subCategory ? 'is-invalid' : ''}`}
-    {...register("subCategory")}
-    disabled={!selectedCategory}
-  >
-    <option value="">Select Sub Category</option>
+            {selectedCategory &&
+              categories
+                .find((cat) => cat.id === selectedCategory)
+                ?.subcategories.map((sub) => (
+                  <option key={sub.path} value={sub.path}>
+                    {sub.name}
+                  </option>
+                ))}
+          </select>
 
-    {selectedCategory &&
-      categories
-        .find(cat => cat.id === selectedCategory)
-        ?.subcategories.map(sub => (
-          <option key={sub} value={sub}>{sub}</option>
-        ))}
-  </select>
 
-  {errors.subCategory && (
-    <p className="text-danger small">{errors.subCategory.message}</p>
-  )}
-</Col>
-
+          {errors.subCategory && (
+            <p className="text-danger small">
+              {errors.subCategory.message}
+            </p>
+          )}
+          {formErrors?.subCategory && (
+  <p className="text-danger small">{formErrors.subCategory}</p>
+)}
+        </Col>
       </Row>
 
       {/* Selected Subcategory */}
       {selectedSubcategory && (
         <Row className="mt-2">
           <Col lg={12}>
-            <label className="form-label fw-bold">Selected subCategory</label>
-            <input type="text" className="form-control" value={selectedSubcategory} readOnly />
+            <label className="form-label fw-bold">Selected Sub Category</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedSubcategory}
+              readOnly
+            />
           </Col>
         </Row>
       )}
@@ -283,9 +351,13 @@ const GeneralDetailsForm = forwardRef(({ updateBlogData, blogData }, ref) => {
                 updateBlogData({ description: val });
               }}
             />
-
           </div>
-          {errors.description && <p className="text-danger small mt-1">{errors.description.message}</p>}
+
+          {errors.description && (
+            <p className="text-danger small mt-1">
+              {errors.description.message}
+            </p>
+          )}
         </Col>
       </Row>
     </form>

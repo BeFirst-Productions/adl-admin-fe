@@ -1,4 +1,3 @@
-// components/FAQManagement.tsx
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -10,7 +9,6 @@ import {
   Badge,
   Modal,
   Form,
-  FormCheck,
   Tabs,
   Tab,
 } from "react-bootstrap";
@@ -21,7 +19,6 @@ import {
   deletefaq,
   editFaq,
   editFaqOrder,
-  editHomeFaq,
   getFaqs,
 } from "@/api/apis";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -34,22 +31,21 @@ const FAQManagement = () => {
   const [faqToDelete, setFaqToDelete] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("home");
 
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
     isActive: true,
+    section: "faqpage",
   });
 
   const [errors, setErrors] = useState({});
-
-  // NEW — View modal
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewFaq, setViewFaq] = useState(null);
 
   const truncate = (text, len = 20) =>
-    text?.length > len ? text.substring(0, len) + "..." : text;
+    text?.length > len ? text.substring(0, len) + "..." : text || "";
 
   const handleViewFaq = (faq) => {
     setViewFaq(faq);
@@ -64,22 +60,31 @@ const FAQManagement = () => {
     setLoading(true);
     try {
       const response = await getFaqs();
-      if (response.success) {
-        const sortedFaqs = response.data.sort((a, b) => a.order - b.order);
+      if (response?.success) {
+        const sortedFaqs = (response.data || []).sort(
+          (a, b) => (a.order || 0) - (b.order || 0)
+        );
         setFaqs(sortedFaqs);
-      }
-    } catch (error) {
+      } else setFaqs([]);
+    } catch {
       toast.error("Failed to load FAQs");
+      setFaqs([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const homeFaqs = faqs.filter((f) => f.home);
-  const nonHomeFaqs = faqs.filter((f) => !f.home);
+  const homeFaqs = faqs.filter((f) => f.section === "home");
+  const faqPageFaqs = faqs.filter((f) => !f.section || f.section === "faqpage");
+  const freezoneFaqs = faqs.filter((f) => f.section === "freezone");
 
-  const homeSectionLimitReached = homeFaqs.length >= 6;
-  const faqPageLimitReached = nonHomeFaqs.length >= 10;
+  const HOME_LIMIT = 6;
+  const FAQPAGE_LIMIT = 10;
+  const FREEZONE_LIMIT = 5;
+
+  const homeSectionLimitReached = homeFaqs.length >= HOME_LIMIT;
+  const faqPageLimitReached = faqPageFaqs.length >= FAQPAGE_LIMIT;
+  const freezoneLimitReached = freezoneFaqs.length >= FREEZONE_LIMIT;
 
   const handleShowModal = (faq) => {
     if (faq) {
@@ -87,7 +92,8 @@ const FAQManagement = () => {
       setFormData({
         question: faq.question,
         answer: faq.answer,
-        isActive: faq.isActive,
+        isActive: faq.isActive ?? true,
+        section: faq.section || "faqpage",
       });
     } else {
       setEditingFaq(null);
@@ -95,8 +101,15 @@ const FAQManagement = () => {
         question: "",
         answer: "",
         isActive: true,
+        section:
+          activeTab === "home"
+            ? "home"
+            : activeTab === "freezone"
+            ? "freezone"
+            : "faqpage",
       });
     }
+    setErrors({});
     setShowModal(true);
   };
 
@@ -107,62 +120,54 @@ const FAQManagement = () => {
       question: "",
       answer: "",
       isActive: true,
+      section: "faqpage",
     });
     setErrors({});
   };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked, type } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleHomeSectionToggle = async (faq) => {
-    if (!faq.home && homeSectionLimitReached) {
-      toast.error("Home section limit reached (max 6)");
-      return;
-    }
-    if (faq.home && faqPageLimitReached) {
-      toast.error("FAQ Page limit reached (max 10)");
-      return;
-    }
-
+  const handleSectionChange = async (faq, newSection) => {
     try {
-      const updatedFaq = { ...faq, home: !faq.home };
-      let response = await editHomeFaq(faq._id, {
-        home: !faq.home,
-      });
+      if (
+        (newSection === "home" && homeSectionLimitReached && faq.section !== "home") ||
+        (newSection === "faqpage" && faqPageLimitReached && faq.section !== "faqpage") ||
+        (newSection === "freezone" && freezoneLimitReached && faq.section !== "freezone")
+      ) {
+        toast.error("Section limit reached");
+        return;
+      }
 
-      if (response.success) {
+      const res = await editFaq(faq._id, { section: newSection });
+      if (res?.success) {
         setFaqs((prev) =>
-          prev.map((f) => (f._id === faq._id ? updatedFaq : f))
+          prev.map((f) => (f._id === faq._id ? { ...f, section: newSection } : f))
         );
-        toast.success(
-          updatedFaq.home ? "Added to Homepage" : "Moved to FAQ Page"
-        );
+        toast.success("Moved successfully");
       }
     } catch {
-      toast.error("Failed to update FAQ");
+      toast.error("Failed to update section");
     }
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!formData.question.trim())
-      newErrors.question = "Question required";
-    else if (formData.question.trim().length < 10)
-      newErrors.question = "Min 10 characters";
+    const e = {};
+    if (!formData.question.trim()) e.question = "Question required";
+    else if (formData.question.trim().length < 10) e.question = "Min 10 characters";
 
-    if (!formData.answer.trim())
-      newErrors.answer = "Answer required";
-    else if (formData.answer.trim().length < 20)
-      newErrors.answer = "Min 20 characters";
+    if (!formData.answer.trim()) e.answer = "Answer required";
+    else if (formData.answer.trim().length < 20) e.answer = "Min 20 characters";
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -172,27 +177,34 @@ const FAQManagement = () => {
     try {
       if (editingFaq) {
         const res = await editFaq(editingFaq._id, formData);
-        if (res.success) {
+
+        if (res?.success) {
           setFaqs((prev) =>
             prev.map((f) =>
-              f._id === editingFaq._id ? { ...editingFaq, ...formData } : f
+              f._id === editingFaq._id ? { ...f, ...formData } : f
             )
           );
           toast.success("FAQ updated");
         }
       } else {
-        const targetSection = activeTab === "home" ? "home" : "faqpage";
-
-        if (targetSection === "home" && homeSectionLimitReached) {
-          toast.error("Cannot add more: Home limit reached");
+        const section = formData.section;
+        if (
+          (section === "home" && homeSectionLimitReached) ||
+          (section === "faqpage" && faqPageLimitReached) ||
+          (section === "freezone" && freezoneLimitReached)
+        ) {
+          toast.error("Section limit reached");
           return;
         }
-        if (targetSection === "faqpage" && faqPageLimitReached) {
-          toast.error("Cannot add more: FAQ Page limit reached");
-          return;
-        }
 
-        const maxOrder = faqs.reduce(
+        const sectionFaqs =
+          section === "home"
+            ? homeFaqs
+            : section === "freezone"
+            ? freezoneFaqs
+            : faqPageFaqs;
+
+        const maxOrder = sectionFaqs.reduce(
           (max, f) => Math.max(max, f.order || 0),
           0
         );
@@ -200,21 +212,16 @@ const FAQManagement = () => {
         const payload = {
           ...formData,
           order: maxOrder + 1,
-          home: targetSection === "home",
         };
 
         const res = await createFaq(payload);
 
-        if (res.success) {
-          const newFaq = {
-            ...res.data,
-            order: maxOrder + 1,
-            home: targetSection === "home",
-          };
-          setFaqs((prev) => [...prev, newFaq]);
+        if (res?.success) {
+          setFaqs((prev) => [...prev, { ...res.data, ...payload }]);
           toast.success("FAQ added");
         }
       }
+
       handleCloseModal();
     } catch {
       toast.error("Failed to save FAQ");
@@ -229,12 +236,13 @@ const FAQManagement = () => {
   const handleDeleteConfirm = async () => {
     try {
       const res = await deletefaq(faqToDelete._id);
-      if (res.success) {
+
+      if (res?.success) {
         setFaqs((prev) => prev.filter((f) => f._id !== faqToDelete._id));
         toast.success("FAQ deleted");
       }
     } catch {
-      toast.error("Failed to delete FAQ");
+      toast.error("Failed to delete");
     }
     setShowDeleteModal(false);
   };
@@ -242,37 +250,31 @@ const FAQManagement = () => {
   const handleDragEnd = async (result, type) => {
     if (!result.destination) return;
 
-    const list = type === "home" ? homeFaqs : nonHomeFaqs;
+    let list =
+      type === "home"
+        ? homeFaqs
+        : type === "faqpage"
+        ? faqPageFaqs
+        : freezoneFaqs;
 
     const reordered = Array.from(list);
     const [moved] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
 
-    const updatedFaqs = [...faqs];
+    const updated = [...faqs];
+
     reordered.forEach((faq, index) => {
-      const realIndex = updatedFaqs.findIndex((f) => f._id === faq._id);
-      if (realIndex !== -1) {
-        updatedFaqs[realIndex] = {
-          ...updatedFaqs[realIndex],
-          order: index + 1,
-        };
-      }
+      const idx = updated.findIndex((f) => f._id === faq._id);
+      updated[idx].order = index + 1;
     });
 
     try {
-      const sectionIds = new Set(reordered.map((f) => f._id));
-      const sectionFaqs = updatedFaqs.filter((f) =>
-        sectionIds.has(f._id)
-      );
-
       await Promise.all(
-        sectionFaqs.map((faq) =>
-          editFaqOrder(faq._id, { order: faq.order })
-        )
+        reordered.map((faq) => editFaqOrder(faq._id, { order: faq.order }))
       );
 
-      setFaqs(updatedFaqs.sort((a, b) => a.order - b.order));
-      toast.success("Order updated!");
+      setFaqs(updated.sort((a, b) => (a.order || 0) - (b.order || 0)));
+      toast.success("Order updated");
     } catch {
       toast.error("Failed to update order");
       loadFAQs();
@@ -281,15 +283,8 @@ const FAQManagement = () => {
 
   const isAddDisabled =
     (activeTab === "home" && homeSectionLimitReached) ||
-    ((activeTab === "faqpage" || activeTab === "all") &&
-      faqPageLimitReached);
-
-  const addButtonLabel =
-    activeTab === "home"
-      ? "Add Home FAQ"
-      : activeTab === "faqpage"
-      ? "Add FAQ Page FAQ"
-      : "Add FAQ";
+    (activeTab === "faqpage" && faqPageLimitReached) ||
+    (activeTab === "freezone" && freezoneLimitReached);
 
   return (
     <>
@@ -297,26 +292,19 @@ const FAQManagement = () => {
         <Col xs={12}>
           <Card>
             <CardBody>
-              <div className="d-flex justify-content-between align-items-start">
+              <div className="d-flex justify-content-between">
                 <div>
                   <h4>FAQ Management</h4>
 
-                  <div className="mt-1">
-                    <Badge
-                      bg={
-                        homeSectionLimitReached ? "primary" : "success"
-                      }
-                    >
-                      Home: {homeFaqs.length}/6
-                    </Badge>
-
-                    <Badge
-                      bg={faqPageLimitReached ? "primary" : "info"}
-                      className="ms-2"
-                    >
-                      FAQ Page: {nonHomeFaqs.length}/10
-                    </Badge>
-                  </div>
+                  <Badge bg="success" className="me-2">
+                    Home: {homeFaqs.length}/6
+                  </Badge>
+                  <Badge bg="info" className="me-2">
+                    FAQ Page: {faqPageFaqs.length}/10
+                  </Badge>
+                  <Badge bg="warning">
+                    Freezone: {freezoneFaqs.length}/5
+                  </Badge>
                 </div>
 
                 <Button
@@ -325,103 +313,26 @@ const FAQManagement = () => {
                   disabled={isAddDisabled}
                 >
                   <IconifyIcon icon="bx:plus" className="me-1" />
-                  {addButtonLabel}
+                  {activeTab === "home"
+                    ? "Add Home FAQ"
+                    : activeTab === "freezone"
+                    ? "Add Freezone FAQ"
+                    : "Add FAQ"}
                 </Button>
               </div>
 
               <Tabs
                 activeKey={activeTab}
-                onSelect={(k) => setActiveTab(k || "all")}
+                onSelect={(k) => setActiveTab(k)}
                 className="mt-3"
               >
-                {/* ALL FAQs */}
-                <Tab eventKey="all" title="All FAQs">
-                  <Table responsive striped className="mt-3">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Question</th>
-                        <th>Answer</th>
-                        <th>Home</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading ? (
-                        <tr>
-                          <td colSpan={5} className="text-center">
-                            Loading...
-                          </td>
-                        </tr>
-                      ) : faqs.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="text-center text-muted">
-                            No FAQs found
-                          </td>
-                        </tr>
-                      ) : (
-                        faqs.map((faq, i) => (
-                          <tr key={faq._id}>
-                            <td>{i + 1}</td>
-                            <td>{faq.question}</td>
-                            <td>{truncate(faq.answer)}</td>
-                            <td>
-                              <FormCheck
-                                type="switch"
-                                checked={faq.home}
-                                onChange={() =>
-                                  handleHomeSectionToggle(faq)
-                                }
-                                disabled={
-                                  (!faq.home && homeSectionLimitReached) ||
-                                  (faq.home && faqPageLimitReached)
-                                }
-                              />
-                            </td>
-                            <td>
-                              <Button
-                                size="sm"
-                                variant="outline-info"
-                                className="me-2"
-                                onClick={() => handleViewFaq(faq)}
-                              >
-                                View
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() => handleShowModal(faq)}
-                              >
-                                Edit
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                variant="outline-danger"
-                                className="ms-2"
-                                onClick={() => handleDeleteClick(faq)}
-                              >
-                                Delete
-                              </Button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </Table>
-                </Tab>
-
-                {/* HOMEPAGE TAB */}
-                <Tab eventKey="home" title="Homepage">
-                  <DragDropContext
-                    onDragEnd={(res) => handleDragEnd(res, "home")}
-                  >
-                    <Droppable droppableId="homeFaqs">
+                {/* HOME TAB */}
+                <Tab eventKey="home" title="Home">
+                  <DragDropContext onDragEnd={(e) => handleDragEnd(e, "home")}>
+                    <Droppable droppableId="homeDroppable">
                       {(provided) => (
                         <Table
-                          responsive
-                          striped
+                        
                           className="mt-3"
                           ref={provided.innerRef}
                           {...provided.droppableProps}
@@ -434,72 +345,55 @@ const FAQManagement = () => {
                               <th>Actions</th>
                             </tr>
                           </thead>
+
                           <tbody>
-                            {homeFaqs.length === 0 ? (
-                              <tr>
-                                <td
-                                  colSpan={4}
-                                  className="text-center text-muted"
-                                >
-                                  No Home FAQs
-                                </td>
-                              </tr>
-                            ) : (
-                              homeFaqs.map((faq, index) => (
-                                <Draggable
-                                  key={faq._id}
-                                  draggableId={faq._id}
-                                  index={index}
-                                >
-                                  {(provided) => (
-                                    <tr
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      style={{
-                                        cursor: "grab",
-                                        ...provided.draggableProps.style,
-                                      }}
-                                    >
-                                      <td>{index + 1}</td>
-                                      <td>{faq.question}</td>
-                                      <td>{truncate(faq.answer)}</td>
-                                      <td>
-                                        <Button
-                                          size="sm"
-                                          variant="outline-info"
-                                          className="me-2"
-                                          onClick={() => handleViewFaq(faq)}
-                                        >
-                                          View
-                                        </Button>
+                            {homeFaqs.map((faq, index) => (
+                              <Draggable
+                                key={faq._id}
+                                draggableId={faq._id}
+                                index={index}
+                              >
+                                {(prov) => (
+                                  <tr
+                                    ref={prov.innerRef}
+                                    {...prov.draggableProps}
+                                    {...prov.dragHandleProps}
+                                  >
+                                    <td>{index + 1}</td>
+                                    <td>{faq.question}</td>
+                                    <td>{truncate(faq.answer)}</td>
+                                    <td>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-info"
+                                        onClick={() => handleViewFaq(faq)}
+                                        className="me-2"
+                                      >
+                                                      <IconifyIcon icon="mdi:eye-outline" className="fs-20" />
 
-                                        <Button
-                                          size="sm"
-                                          variant="outline-primary"
-                                          onClick={() =>
-                                            handleShowModal(faq)
-                                          }
-                                        >
-                                          Edit
-                                        </Button>
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-primary"
+                                        onClick={() => handleShowModal(faq)}
+                                        className="me-2"
+                                      >
+                                                      <IconifyIcon icon="bx:edit" className="fs-20" />
 
-                                        <Button
-                                          size="sm"
-                                          variant="outline-danger"
-                                          className="ms-2"
-                                          onClick={() =>
-                                            handleDeleteClick(faq)
-                                          }
-                                        >
-                                          Delete
-                                        </Button>
-                                      </td>
-                                    </tr>
-                                  )}
-                                </Draggable>
-                              ))
-                            )}
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-danger"
+                                        onClick={() => handleDeleteClick(faq)}
+                                      >
+                                                      <IconifyIcon icon="bx:trash" className="fs-20" />
+
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Draggable>
+                            ))}
                             {provided.placeholder}
                           </tbody>
                         </Table>
@@ -511,13 +405,12 @@ const FAQManagement = () => {
                 {/* FAQ PAGE TAB */}
                 <Tab eventKey="faqpage" title="FAQ Page">
                   <DragDropContext
-                    onDragEnd={(res) => handleDragEnd(res, "faqpage")}
+                    onDragEnd={(e) => handleDragEnd(e, "faqpage")}
                   >
-                    <Droppable droppableId="pageFaqs">
+                    <Droppable droppableId="faqpageDroppable">
                       {(provided) => (
                         <Table
-                          responsive
-                          striped
+                        
                           className="mt-3"
                           ref={provided.innerRef}
                           {...provided.droppableProps}
@@ -530,72 +423,131 @@ const FAQManagement = () => {
                               <th>Actions</th>
                             </tr>
                           </thead>
+
                           <tbody>
-                            {nonHomeFaqs.length === 0 ? (
-                              <tr>
-                                <td
-                                  colSpan={4}
-                                  className="text-center text-muted"
-                                >
-                                  No FAQ Page FAQs
-                                </td>
-                              </tr>
-                            ) : (
-                              nonHomeFaqs.map((faq, index) => (
-                                <Draggable
-                                  key={faq._id}
-                                  draggableId={faq._id}
-                                  index={index}
-                                >
-                                  {(provided) => (
-                                    <tr
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      style={{
-                                        cursor: "grab",
-                                        ...provided.draggableProps.style,
-                                      }}
-                                    >
-                                      <td>{index + 1}</td>
-                                      <td>{faq.question}</td>
-                                      <td>{truncate(faq.answer)}</td>
-                                      <td>
-                                        <Button
-                                          size="sm"
-                                          variant="outline-info"
-                                          className="me-2"
-                                          onClick={() => handleViewFaq(faq)}
-                                        >
-                                          View
-                                        </Button>
+                            {faqPageFaqs.map((faq, index) => (
+                              <Draggable
+                                key={faq._id}
+                                draggableId={faq._id}
+                                index={index}
+                              >
+                                {(prov) => (
+                                  <tr
+                                    ref={prov.innerRef}
+                                    {...prov.draggableProps}
+                                    {...prov.dragHandleProps}
+                                  >
+                                    <td>{index + 1}</td>
+                                    <td>{faq.question}</td>
+                                    <td>{truncate(faq.answer)}</td>
+                                    <td>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-info"
+                                        className="me-2"
+                                        onClick={() => handleViewFaq(faq)}
+                                      >
+                                                      <IconifyIcon icon="mdi:eye-outline" className="fs-20" />
 
-                                        <Button
-                                          size="sm"
-                                          variant="outline-primary"
-                                          onClick={() =>
-                                            handleShowModal(faq)
-                                          }
-                                        >
-                                          Edit
-                                        </Button>
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-primary"
+                                        className="me-2"
+                                        onClick={() => handleShowModal(faq)}
+                                      >
+              <IconifyIcon icon="bx:edit" className="fs-20" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-danger"
+                                        onClick={() => handleDeleteClick(faq)}
+                                      >
+                                                      <IconifyIcon icon="bx:trash" className="fs-20" />
 
-                                        <Button
-                                          size="sm"
-                                          variant="outline-danger"
-                                          className="ms-2"
-                                          onClick={() =>
-                                            handleDeleteClick(faq)
-                                          }
-                                        >
-                                          Delete
-                                        </Button>
-                                      </td>
-                                    </tr>
-                                  )}
-                                </Draggable>
-                              ))
-                            )}
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </tbody>
+                        </Table>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </Tab>
+
+                {/* FREEZONE TAB */}
+                <Tab eventKey="freezone" title="Freezone">
+                  <DragDropContext
+                    onDragEnd={(e) => handleDragEnd(e, "freezone")}
+                  >
+                    <Droppable droppableId="freezoneDroppable">
+                      {(provided) => (
+                        <Table
+                     
+                          className="mt-3"
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                        >
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>Question</th>
+                              <th>Answer</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {freezoneFaqs.map((faq, index) => (
+                              <Draggable
+                                key={faq._id}
+                                draggableId={faq._id}
+                                index={index}
+                              >
+                                {(prov) => (
+                                  <tr
+                                    ref={prov.innerRef}
+                                    {...prov.draggableProps}
+                                    {...prov.dragHandleProps}
+                                  >
+                                    <td>{index + 1}</td>
+                                    <td>{faq.question}</td>
+                                    <td>{truncate(faq.answer)}</td>
+                                    <td>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-info"
+                                        className="me-2"
+                                        onClick={() => handleViewFaq(faq)}
+                                      >
+                                                      <IconifyIcon icon="mdi:eye-outline" className="fs-20" />
+
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-primary"
+                                        className="me-2"
+                                        onClick={() => handleShowModal(faq)}
+                                      >
+                                                      <IconifyIcon icon="bx:edit" className="fs-20" />
+
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline-danger"
+                                        onClick={() => handleDeleteClick(faq)}
+                                      >
+              <IconifyIcon icon="bx:trash" className="fs-20" />
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Draggable>
+                            ))}
                             {provided.placeholder}
                           </tbody>
                         </Table>
@@ -623,7 +575,6 @@ const FAQManagement = () => {
                 name="question"
                 value={formData.question}
                 onChange={handleInputChange}
-                placeholder="Enter question (min 10 characters)"
                 isInvalid={!!errors.question}
               />
               <Form.Control.Feedback type="invalid">
@@ -635,10 +586,9 @@ const FAQManagement = () => {
               <Form.Label>Answer</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={4}
+                rows="4"
                 name="answer"
                 value={formData.answer}
-                placeholder="Enter answer (min 20 characters)"
                 onChange={handleInputChange}
                 isInvalid={!!errors.answer}
               />
@@ -646,13 +596,36 @@ const FAQManagement = () => {
                 {errors.answer}
               </Form.Control.Feedback>
             </Form.Group>
+
+            <Form.Group className="mt-3">
+              <Form.Label>Section</Form.Label>
+              <Form.Select
+                name="section"
+                value={formData.section}
+                onChange={handleInputChange}
+              >
+                <option value="home">Home</option>
+                <option value="faqpage">FAQ Page</option>
+                <option value="freezone">Freezone</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mt-3">
+              <Form.Check
+                type="checkbox"
+                label="Active"
+                name="isActive"
+                checked={formData.isActive}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
           </Modal.Body>
 
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
+            <Button type="submit" variant="primary">
               {editingFaq ? "Update" : "Create"}
             </Button>
           </Modal.Footer>
@@ -660,25 +633,26 @@ const FAQManagement = () => {
       </Modal>
 
       {/* VIEW MODAL */}
-      <Modal
-        show={showViewModal}
-        onHide={() => setShowViewModal(false)}
-        size="lg"
-      >
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>FAQ Details</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           {viewFaq && (
             <>
               <h5>Question</h5>
               <p>{viewFaq.question}</p>
 
-              <h5 className="mt-3">Answer</h5>
+              <h5>Answer</h5>
               <p>{viewFaq.answer}</p>
+
+              <h6>Section</h6>
+              <p>{viewFaq.section || "faqpage"}</p>
             </>
           )}
         </Modal.Body>
+
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>
             Close
@@ -687,21 +661,13 @@ const FAQManagement = () => {
       </Modal>
 
       {/* DELETE MODAL */}
-      <Modal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-      >
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Delete FAQ</Modal.Title>
         </Modal.Header>
-
-        <Modal.Body>Are you sure you want to delete this FAQ?</Modal.Body>
-
+        <Modal.Body>Are you sure?</Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteModal(false)}
-          >
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
             Cancel
           </Button>
           <Button variant="danger" onClick={handleDeleteConfirm}>

@@ -4,10 +4,10 @@ import { setAccessToken } from "./tokenService";
 export const signIn = async (userData) => {
     try {
         const response = await axiosInstance.post('/auth/login', userData)
-        setAccessToken(response.data.data.accessToken);
-        return response
+        // setAccessToken(response.data.data.accessToken);
+        return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
 
     }
 }
@@ -149,7 +149,8 @@ export const addBlog = async (blogData) => {
 
         return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
+
 
     }
 }
@@ -180,7 +181,7 @@ export const updateBlog = async (id, blogData) => {
         })
         return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
 
     }
 }
@@ -236,6 +237,24 @@ export const getGallery = async (page,limit) => {
 export const deleteGalleryImage = async (id) => {
     try {
         const response = await axiosInstance.delete(`/gallery/delete-image/${id}`)
+        return response.data
+    } catch (error) {
+        console.error(error);
+
+    }
+}
+export const getHeroSection = async () => {
+    try {
+        const response = await axiosInstance.get(`/herosection/get-herosection`)
+        return response.data
+    } catch (error) {
+        console.error(error);
+
+    }
+}
+export const updateHeroSection = async (heroData) => {
+    try {
+        const response = await axiosInstance.put(`/herosection/save-herosection`,heroData)
         return response.data
     } catch (error) {
         console.error(error);

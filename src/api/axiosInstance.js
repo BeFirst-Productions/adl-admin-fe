@@ -1,30 +1,50 @@
 import axios from "axios";
-import { getAccessToken, setAccessToken } from "./tokenService";
+import { getAccessToken, setAccessToken, clearAccessToken } from "./tokenService";
 
+// ===============================
+// AXIOS INSTANCE
+// ===============================
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true,
+  withCredentials: true, // ✅ REQUIRED for refresh cookie
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 // ===============================
-// 1. Request Interceptor
+// TOKEN REFRESH CONTROLLER
+// ===============================
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+
+  failedQueue = [];
+};
+
+// ===============================
+// 1. REQUEST INTERCEPTOR
 // ===============================
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 // ===============================
-// 2. Response Interceptor
+// 2. RESPONSE INTERCEPTOR (AUTO REFRESH)
 // ===============================
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -32,32 +52,52 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // ✅ DO NOT REFRESH ON AUTH ROUTES
+    if (
+      originalRequest.url.includes("/auth/login") ||
+      originalRequest.url.includes("/auth/logout") ||
+      originalRequest.url.includes("/auth/refresh")
+    ) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return axiosInstance(originalRequest);
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const res = await axiosInstance.post("/auth/refresh");
+        const newToken = res.data.accessToken;
 
-        const newToken = res.data.data.accessToken;
-
-        // Save new token in memory
         setAccessToken(newToken);
+        processQueue(null, newToken);
 
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error("Refresh token expired or invalid");
+        processQueue(refreshError, null);
+
+        clearAccessToken();
+        window.location.href = "/login";
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;
