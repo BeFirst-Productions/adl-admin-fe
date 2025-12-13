@@ -4,42 +4,53 @@ export const MENU_ITEMS = [
     label: 'GENERAL',
     isTitle: true,
   },
-  {
-    key: 'dashboards',
-    icon: 'iconamoon:home-duotone',
-    label: 'Dashboards',
-    children: [
+  // {
+  //   key: 'dashboards',
+  //   icon: 'iconamoon:home-duotone',
+  //   label: 'Dashboards',
+  //   children: [
       {
+        key: 'dashboard',
+        icon: 'iconamoon:apps-bold',
+        label: 'Dashboard',
+        url: '/',
+        // parentKey: 'dashboards',
+      },
+            {
         key: 'dashboard-analytics',
+        icon: 'carbon:analytics',
         label: 'Analytics',
-        url: '/dashboard/analytics',
-        parentKey: 'dashboards',
+        url: '/analytics',
+        // parentKey: 'dashboards',
       },
+  //     {
+  //       key: 'dashboard-finance',
+  //       label: 'Finance',
+  //       url: '/dashboard/finance',
+  //       parentKey: 'dashboards',
+  //     },
+  //     {
+  //       key: 'dashboard-sales',
+  //       label: 'Sales',
+  //       url: '/dashboard/sales',
+  //       parentKey: 'dashboards',
+  //     },
+  //   ],
+  // },
+  // {
+  //   key: 'users',
+  //   icon: 'mdi:account-group',
+  //   label: 'Users',
+  //   children: [
       {
-        key: 'dashboard-finance',
-        label: 'Finance',
-        url: '/dashboard/finance',
-        parentKey: 'dashboards',
+        key: 'user-management',
+        label: 'Users',
+        url: '/user-management',
+        icon: 'mdi:account-group',
+        // parentKey: 'users',
       },
-      {
-        key: 'dashboard-sales',
-        label: 'Sales',
-        url: '/dashboard/sales',
-        parentKey: 'dashboards',
-      },
-    ],
-  },
-  {
-
-
-    key: 'user-management',
-    icon: 'mdi:user',
-
-    label: 'User Management',
-    url: '/user-management',
-
-
-  },
+  //   ],
+  // },
   // {
   //   key: 'enquiry',
   //   icon: 'mdi:message-text-outline',
@@ -114,6 +125,14 @@ export const MENU_ITEMS = [
     url: '/seo',
 
   },
+  {
+      key: 'page-packages',
+      icon: 'iconamoon:box-bold',
+      label: 'Packages',
+      url: '/packages',
+    
+    },
+
 
   //  {
   //   key: 'ecommerce',

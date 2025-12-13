@@ -134,7 +134,7 @@ const initialRoutes = [{
   element: <NotFound />
 }];
 const generalRoutes = [{
-  path: '/dashboard/analytics',
+  path: '/analytics',
   name: 'Analytics',
   element: <Analytics />
 }, {
@@ -248,8 +248,8 @@ const customRoutes = [{
   path: '/pages/timeline',
   element: <TimelinePage />
 }, {
-  name: 'Pricing',
-  path: '/pages/pricing',
+  name: 'Packages',
+  path: '/pages/packages',
   element: <Pricing />
 }, {
   name: 'Error 404 Alt',

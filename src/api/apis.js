@@ -1,5 +1,5 @@
-import axiosInstance from "./axiosInstance";
-import { setAccessToken } from "./tokenService";
+import axiosInstance from './axiosInstance'
+import { setAccessToken } from './tokenService'
 
 export const signIn = async (userData) => {
     try {
@@ -12,8 +12,8 @@ export const signIn = async (userData) => {
     }
 }
 export const createUser = async (userData) => {
-    try {
-        const response = await axiosInstance.post('/user/create-user', userData)
+  try {
+    const response = await axiosInstance.post('/user/create-user', userData)
 
         return response
     } catch (error) {
@@ -22,34 +22,31 @@ export const createUser = async (userData) => {
     }
 }
 export const getAllUsers = async () => {
-    try {
-        const response = await axiosInstance.get('/user/all-users')
+  try {
+    const response = await axiosInstance.get('/user/all-users')
 
-        return response
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const deleteUser = async (id) => {
-    try {
-        const response = await axiosInstance.delete(`/user/delete-user/${id}`)
+  try {
+    const response = await axiosInstance.delete(`/user/delete-user/${id}`)
 
-        return response
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const editUser = async (userData) => {
-    try {
-        const response = await axiosInstance.patch(`/user/edit-user/${userData._id}`, userData)
+  try {
+    const response = await axiosInstance.patch(`/user/edit-user/${userData._id}`, userData)
 
-        return response
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 export const createFaq = async (faqData) => {
@@ -72,44 +69,40 @@ export const getFaqs = async () => {
 }
 
 export const deletefaq = async (id) => {
-    try {
-        const response = await axiosInstance.delete(`/faq/delete-faq/${id}`)
+  try {
+    const response = await axiosInstance.delete(`/faq/delete-faq/${id}`)
 
-        return response.data
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const editFaq = async (id, faqData) => {
     try {
         const response = await axiosInstance.patch(`/faq/edit-faq/${id}`, faqData)
 
-        return response.data
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const editHomeFaq = async (id, faqData) => {
     try {
         const response = await axiosInstance.patch(`/faq/edit-home-faq/${id}`, faqData)
 
-        return response.data
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const editFaqOrder = async (id, faqData) => {
     try {
         const response = await axiosInstance.patch(`/faq/edit-faq-order/${id}`, faqData)
 
-        return response.data
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
 }
 export const getEnquiries = async (page, limit, filters = {}) => {
     try {
@@ -129,19 +122,19 @@ export const getEnquiries = async (page, limit, filters = {}) => {
 
 
 export const deleteEnquiries = async (id) => {
-    try {
-        const response = await axiosInstance.delete(`/enquiry/delete-enquiry/${id}`)
+  try {
+    const response = await axiosInstance.delete(`/enquiry/delete-enquiry/${id}`)
 
-        return response.data
-    } catch (error) {
-        console.error(error);
-
-    }
+    return response.data
+  } catch (error) {
+    console.error(error)
+  }
 }
+
 
 export const addBlog = async (blogData) => {
     try {
-        const response = await axiosInstance.post(`/blog/add-blog`, blogData, {
+       const response = await axiosInstance.post(`/blog/add-blog`, blogData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             }
@@ -165,7 +158,7 @@ export const getBlogs = async (query = "") => {
 
 export const getBlog = async (id) => {
     try {
-        const response = await axiosInstance.get(`/blog/get-blog/${id}`)
+          const response = await axiosInstance.get(`/blog/get-blog/${id}`)
         return response.data
     } catch (error) {
         console.error(error);
@@ -174,7 +167,7 @@ export const getBlog = async (id) => {
 }
 export const updateBlog = async (id, blogData) => {
     try {
-        const response = await axiosInstance.put(`/blog/update-blog/${id}`, blogData, {
+       const response = await axiosInstance.put(`/blog/update-blog/${id}`, blogData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             }
@@ -187,13 +180,255 @@ export const updateBlog = async (id, blogData) => {
 }
 export const deleteBlog = async (id) => {
     try {
-        const response = await axiosInstance.delete(`/blog/delete-blog/${id}`)
+    const response = await axiosInstance.delete(`/blog/delete-blog/${id}`)
         return response.data
     } catch (error) {
         console.error(error);
 
     }
 }
+
+/**
+======= Newsletter APIs ========
+ **/
+
+export const subscribeNewsletter = async (email) => {
+  try {
+    const response = await axiosInstance.post('/newsletter/subscribe', { email })
+    return response.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const getSubscribers = async (options = {}) => {
+  try {
+    const res = await axiosInstance.get('/newsletter/subscribers', { params: options })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const unsubscribeNewsletter = async (token) => {
+  try {
+    const response = await axiosInstance.post('/newsletter/unsubscribe', { token })
+    return response.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const exportSubscribersFile = async (options = {}) => {
+  try {
+    const res = await axiosInstance.get('/newsletter/subscribers', {
+      params: options,
+      responseType: 'blob',
+    })
+    return res
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const blockSubscriber = async (payload = {}) => {
+  // payload: { id?, email?, reason? }
+  try {
+    const res = await axiosInstance.post('/newsletter/block', payload)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const getBlockedSubscribers = async (options = {}) => {
+  try {
+    const res = await axiosInstance.get('/newsletter/blocked', { params: options })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const unblockSubscriber = async (payload = {}) => {
+  // payload: { id?, email? }
+  try {
+    const res = await axiosInstance.post('/newsletter/unblock', payload)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const deleteSubscriber = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/newsletter/${id}`)
+    return response.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+/* ------------------ COMMON PACKAGES ------------------ */
+
+export const getAllCommonPackages = async (options = {}) => {
+  // options: { type: 'home' | 'freezone' } -> maps to ?type=home
+  try {
+    const res = await axiosInstance.get('/packages/common', { params: options })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const getCommonPackageById = async (id) => {
+  try {
+    const res = await axiosInstance.get(`/packages/common/${id}`)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const createCommonPackage = async ({ title, description, amount, points = [], is_home = false, is_freezone = false, imageFile = null }) => {
+  try {
+    const fd = new FormData()
+    fd.append('title', title)
+    fd.append('description', description)
+    fd.append('amount', amount)
+    // append points as points[] (backend expects points[] from UI)
+    points.forEach((p) => fd.append('points[]', p))
+    // booleans — backend accepts 'true'/'1' etc.
+    if (is_home) fd.append('is_home', '1')
+    if (is_freezone) fd.append('is_freezone', '1')
+    if (imageFile) fd.append('image', imageFile) // NOTE: route uses uploadPackageImage.single('image')
+    const res = await axiosInstance.post('/packages/common', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const updateCommonPackage = async (id, { title, description, amount, points = null, is_home, is_freezone, imageFile = null }) => {
+  try {
+    const fd = new FormData()
+    if (title !== undefined) fd.append('title', title)
+    if (description !== undefined) fd.append('description', description)
+    if (amount !== undefined) fd.append('amount', amount)
+    // If points is provided, send points[]; if null, skip
+    if (Array.isArray(points)) points.forEach((p) => fd.append('points[]', p))
+    if (is_home !== undefined) fd.append('is_home', is_home ? '1' : '0')
+    if (is_freezone !== undefined) fd.append('is_freezone', is_freezone ? '1' : '0')
+    if (imageFile) fd.append('image', imageFile)
+    const res = await axiosInstance.put(`/packages/common/${id}`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const deleteCommonPackage = async (id) => {
+  try {
+    const res = await axiosInstance.delete(`/packages/common/${id}`)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+export const getCommonPackageCounts = async () => {
+  try {
+    const res = await axiosInstance.get('/packages/common/counts')
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+/* ------------------ CATEGORY PACKAGES ------------------ */
+// Create category package (nested). body: { categoryKey, pageName, title, price, points: [] }
+export const createCategoryPackage = async ({ categoryKey, pageName, title, price, points = [] }) => {
+  try {
+    const payload = { categoryKey, pageName, title, price, points }
+    const res = await axiosInstance.post('/packages/category', payload)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+// Get category packages. If categoryKey provided returns that doc; if pageName provided returns packages of that page.
+export const getCategoryPackages = async (params = {}) => {
+  try {
+    // params: { categoryKey, pageName }
+    const res = await axiosInstance.get('/packages/category', { params })
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+// Update nested package:
+// PUT /category/:categoryKey/pages/:pageName/packages/:packageId
+export const updateCategoryPackage = async ({ categoryKey, pageName, packageId, title, price, points = null }) => {
+  try {
+    const payload = {}
+    if (title !== undefined) payload.title = title
+    if (price !== undefined) payload.price = price
+    if (points !== null) payload.points = points
+    const res = await axiosInstance.put(`/packages/category/${categoryKey}/pages/${encodeURIComponent(pageName)}/packages/${packageId}`, payload)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+// Delete nested package:
+export const deleteCategoryPackage = async ({ categoryKey, pageName, packageId }) => {
+  try {
+    const res = await axiosInstance.delete(`/packages/category/${categoryKey}/pages/${encodeURIComponent(pageName)}/packages/${packageId}`)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+// Get page counts for a category
+export const getCategoryPageCounts = async (categoryKey) => {
+  try {
+    const res = await axiosInstance.get(`/packages/category/${categoryKey}/counts`)
+    return res.data
+  } catch (error) {
+    if (error?.response?.data) throw error.response.data
+    throw error
+  }
+}
+
+
+/* ------------------ SEO  ------------------ */
+
 export const saveSeo = async (seoData) => {
     try {
         const response = await axiosInstance.post(`/seo/add-seo`, seoData)
@@ -212,6 +447,9 @@ export const getSeo = async (selectedPage, selectedInnerPage) => {
 
     }
 }
+
+/* ------------------ Gallery  ------------------ */
+
 export const addGallery = async (galleryImage) => {
     try {
         const response = await axiosInstance.post(`/gallery/add-image`, galleryImage, {
