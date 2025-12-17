@@ -2,26 +2,16 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthLayout from '@/layouts/AuthLayout'
 import { useAuthContext } from '@/context/useAuthContext'
 import { appRoutes, authRoutes } from '@/routes/index'
-  ;
-import AdminLayout from '@/layouts/AdminLayout';
-import SignIn from '@/app/(other)/auth/sign-in/page';
 import { lazy } from 'react';
-import FAQManagement from '@/app/(admin)/faq/page';
-import 'react-toastify/dist/ReactToastify.css';
-import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement';
-import PrivateRoute from '@/components/private/PrivateRoute';
-import SeoLayout from '@/app/(admin)/seo/SeoLayout';
 import ProtectedRoute from './ProtectedRoute';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import LoginProtectRoute from './LoginProtectRoute';
 import HeroSectionManagement from '@/app/(admin)/HeroSection/HeroSectionManagement';
 import AdminLayout from '@/layouts/AdminLayout'
 import SignIn from '@/app/(other)/auth/sign-in/page'
-import { lazy } from 'react'
 import FAQManagement from '@/app/(admin)/faq/page'
 import 'react-toastify/dist/ReactToastify.css'
 import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement'
-import PrivateRoute from '@/components/private/PrivateRoute'
 const Pricing = lazy(() => import('@/app/(admin)/pages/pricing/page'))
 import SeoLayout from '@/app/(admin)/seo/SeoLayout'
 const Cards = lazy(() => import('@/app/(admin)/ui/cards/page'))
