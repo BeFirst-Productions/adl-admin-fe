@@ -39,7 +39,7 @@ const AppRouter = props => {
 
         <Route path="/login" element={<LoginProtectRoute><AuthLayout><SignIn /></AuthLayout></LoginProtectRoute>} />
         <Route path="/" element={<ProtectedRoute>
-          <AdminLayout><Analytics /></AdminLayout></ProtectedRoute>} />
+          <AdminLayout><Dashboard /></AdminLayout></ProtectedRoute>} />
 
         <Route
           path="/user-management"
@@ -165,7 +165,6 @@ const AppRouter = props => {
           }
         />
         <Route
-<<<<<<< HEAD
           path="/herosection"
           element={
             <ProtectedRoute allowedRoles={["superadmin"]}>
@@ -173,15 +172,20 @@ const AppRouter = props => {
                 <HeroSectionManagement />
               </AdminLayout>
             </ProtectedRoute>
-=======
+          }
+        />
+        <Route
           path="/settings"
           element={
             <AdminLayout>
               <Settings />
-            </AdminLayout>
->>>>>>> cd75fad7f9b4a3fa273dcf3982fbca14435c39a5
-          }
-        />
+            </AdminLayout>}/>
+        <Route
+          path="/analytics"
+          element={
+            <AdminLayout>
+              <Analytics />
+            </AdminLayout>}/>
       </Routes>
     </AuthProvider>
 
