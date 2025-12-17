@@ -4,10 +4,10 @@ import { setAccessToken } from './tokenService'
 export const signIn = async (userData) => {
     try {
         const response = await axiosInstance.post('/auth/login', userData)
-        setAccessToken(response.data.data.accessToken);
-        return response
+        // setAccessToken(response.data.data.accessToken);
+        return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
 
     }
 }
@@ -142,7 +142,8 @@ export const addBlog = async (blogData) => {
 
         return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
+
 
     }
 }
@@ -173,7 +174,7 @@ export const updateBlog = async (id, blogData) => {
         })
         return response.data
     } catch (error) {
-        console.error(error);
+        throw error.response ? error.response.data : error;
 
     }
 }
@@ -364,10 +365,15 @@ export const getCommonPackageCounts = async () => {
 
 /* ------------------ CATEGORY PACKAGES ------------------ */
 // Create category package (nested). body: { categoryKey, pageName, title, price, points: [] }
-export const createCategoryPackage = async ({ categoryKey, pageName, title, price, points = [] }) => {
+export const createCategoryPackage = async (formData) => {
   try {
-    const payload = { categoryKey, pageName, title, price, points }
-    const res = await axiosInstance.post('/packages/category', payload)
+
+    const res = await axiosInstance.post('/packages/category', formData, {
+  headers: {
+    "Content-Type": "multipart/form-data"
+  }
+});
+
     return res.data
   } catch (error) {
     if (error?.response?.data) throw error.response.data
@@ -376,10 +382,10 @@ export const createCategoryPackage = async ({ categoryKey, pageName, title, pric
 }
 
 // Get category packages. If categoryKey provided returns that doc; if pageName provided returns packages of that page.
-export const getCategoryPackages = async (params = {}) => {
+export const getCategoryPackages = async (page,innerPage) => {
   try {
     // params: { categoryKey, pageName }
-    const res = await axiosInstance.get('/packages/category', { params })
+    const res = await axiosInstance.get(`/packages/category?page=${page}&innerPage=${innerPage}`)
     return res.data
   } catch (error) {
     if (error?.response?.data) throw error.response.data
@@ -389,13 +395,13 @@ export const getCategoryPackages = async (params = {}) => {
 
 // Update nested package:
 // PUT /category/:categoryKey/pages/:pageName/packages/:packageId
-export const updateCategoryPackage = async ({ categoryKey, pageName, packageId, title, price, points = null }) => {
+export const updateCategoryPackage = async (packageId,packageData) => {
   try {
-    const payload = {}
-    if (title !== undefined) payload.title = title
-    if (price !== undefined) payload.price = price
-    if (points !== null) payload.points = points
-    const res = await axiosInstance.put(`/packages/category/${categoryKey}/pages/${encodeURIComponent(pageName)}/packages/${packageId}`, payload)
+    const res = await axiosInstance.put(`/packages/category/update-package/${packageId}`, packageData,{
+  headers: {
+    "Content-Type": "multipart/form-data"
+  }
+})
     return res.data
   } catch (error) {
     if (error?.response?.data) throw error.response.data
@@ -404,10 +410,12 @@ export const updateCategoryPackage = async ({ categoryKey, pageName, packageId, 
 }
 
 // Delete nested package:
-export const deleteCategoryPackage = async ({ categoryKey, pageName, packageId }) => {
+export const deleteCategoryPackage = async ( categoryId) => {
   try {
-    const res = await axiosInstance.delete(`/packages/category/${categoryKey}/pages/${encodeURIComponent(pageName)}/packages/${packageId}`)
-    return res.data
+ const res = await axiosInstance.delete(
+      `/packages/category/delete-package`,
+      { params: { categoryId } } // ✅ best practice
+    );    return res.data
   } catch (error) {
     if (error?.response?.data) throw error.response.data
     throw error
@@ -474,6 +482,24 @@ export const getGallery = async (page,limit) => {
 export const deleteGalleryImage = async (id) => {
     try {
         const response = await axiosInstance.delete(`/gallery/delete-image/${id}`)
+        return response.data
+    } catch (error) {
+        console.error(error);
+
+    }
+}
+export const getHeroSection = async () => {
+    try {
+        const response = await axiosInstance.get(`/herosection/get-herosection`)
+        return response.data
+    } catch (error) {
+        console.error(error);
+
+    }
+}
+export const updateHeroSection = async (heroData) => {
+    try {
+        const response = await axiosInstance.put(`/herosection/save-herosection`,heroData)
         return response.data
     } catch (error) {
         console.error(error);

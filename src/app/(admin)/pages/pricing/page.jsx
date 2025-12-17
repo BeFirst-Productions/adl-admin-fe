@@ -15,9 +15,12 @@ import {
   createCategoryPackage,
   updateCategoryPackage,
   deleteCategoryPackage
-} from '@/api/apis'; 
+} from '@/api/apis';
+import { toast } from 'react-toastify';
+import { STATIC_FREEZONES } from './freezone';
+import DeleteConfrimModal from '../../Common/DeleteConfrimModal';
 
-const currency = 'UAD';
+const currency = 'UAD ';
 
 /* ===================== Inline card styles for premium look ===================== */
 const cardStyles = {
@@ -29,7 +32,7 @@ const cardStyles = {
     flexDirection: 'column'
   },
   imgWrapper: {
-    height: 120,
+    height: 180,
     overflow: 'hidden',
     display: 'flex',
     alignItems: 'center',
@@ -159,45 +162,74 @@ const CategoryPackageCard = ({ pkg, onEdit, onDelete }) => {
 
 /* ===================== CommonPackageModal ===================== */
 const CommonPackageModal = ({ show, onHide, initial = null, onSubmit }) => {
-  const [title, setTitle] = useState(initial?.title || '');
-  const [description, setDescription] = useState(initial?.description || '');
-  const [amount, setAmount] = useState(initial?.amount ?? '');
-  const [pointsStr, setPointsStr] = useState((initial?.points || []).map(p => typeof p === 'string' ? p : p.text).join(','));
-  const [isHome, setIsHome] = useState(!!initial?.is_home);
-  const [isFreezone, setIsFreezone] = useState(!!initial?.is_freezone);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [pointsStr, setPointsStr] = useState('');
+  const [isHome, setIsHome] = useState(false);
+  const [isFreezone, setIsFreezone] = useState(false);
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(initial?.iconUrl || null);
+  const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  React.useEffect(() => {
+  useEffect(() => {
     setTitle(initial?.title || '');
     setDescription(initial?.description || '');
     setAmount(initial?.amount ?? '');
-    setPointsStr((initial?.points || []).map(p => typeof p === 'string' ? p : p.text).join(','));
+    setPointsStr(
+      (initial?.points || [])
+        .map(p => (typeof p === 'string' ? p : p.text))
+        .join(',')
+    );
     setIsHome(!!initial?.is_home);
     setIsFreezone(!!initial?.is_freezone);
     setPreview(initial?.iconUrl || null);
     setFile(null);
     setSubmitting(false);
+    setErrors({});
   }, [initial, show]);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
     setFile(f || null);
+
     if (f) {
-      const url = URL.createObjectURL(f);
-      setPreview(url);
+      setPreview(URL.createObjectURL(f));
+      setErrors(prev => ({ ...prev, image: null }));
     } else {
       setPreview(initial?.iconUrl || null);
     }
   };
 
   const handleSubmit = async () => {
+    const newErrors = {};
     const points = pointsStr.split(',').map(s => s.trim()).filter(Boolean);
-    if (!title || !description) return alert('Title and description required');
-    if (!points.length || points.length > 4) return alert('Points: 1–4 items');
-    if (amount === '' || Number.isNaN(Number(amount))) return alert('Valid amount required');
-    if (isHome && isFreezone) return alert('Only one of Home or Freezone allowed');
+
+    if (!title) newErrors.title = 'Title is required';
+    if (!description) newErrors.description = 'Description is required';
+
+    if (amount === '' || Number.isNaN(Number(amount))) {
+      newErrors.amount = 'Enter a valid amount';
+    }
+
+    if (!points.length || points.length > 4) {
+      newErrors.points = 'Points must be between 1 and 4 items';
+    }
+
+    if (isHome && isFreezone) {
+      newErrors.flags = 'Select either Home or Freezone, not both';
+    }
+
+    // Image validation (required on create)
+    if (!initial && !file) {
+      newErrors.image = 'Image is required';
+    }
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -214,7 +246,6 @@ const CommonPackageModal = ({ show, onHide, initial = null, onSubmit }) => {
       onHide();
     } catch (err) {
       console.error(err);
-      alert(err?.message || 'Save failed');
     } finally {
       setSubmitting(false);
     }
@@ -223,66 +254,184 @@ const CommonPackageModal = ({ show, onHide, initial = null, onSubmit }) => {
   return (
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>{initial ? 'Edit Common Package' : 'Create Common Package'}</Modal.Title>
+        <Modal.Title>
+          {initial ? 'Edit Common Package' : 'Create Common Package'}
+        </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <Form>
+        <Form noValidate>
           <Row className="g-3">
             <Col md={8}>
+              {/* Title */}
               <Form.Group>
                 <Form.Label>Title</Form.Label>
-                <Form.Control value={title} onChange={e => setTitle(e.target.value)} />
+                <Form.Control
+                  value={title}
+                  isInvalid={!!errors.title}
+                  onChange={e => {
+                    setTitle(e.target.value);
+                    setErrors(prev => ({ ...prev, title: null }));
+                  }}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.title}
+                </Form.Control.Feedback>
               </Form.Group>
 
+              {/* Description */}
               <Form.Group className="mt-2">
                 <Form.Label>Description</Form.Label>
-                <Form.Control as="textarea" rows={3} value={description} onChange={e => setDescription(e.target.value)} />
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={description}
+                  isInvalid={!!errors.description}
+                  onChange={e => {
+                    setDescription(e.target.value);
+                    setErrors(prev => ({ ...prev, description: null }));
+                  }}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.description}
+                </Form.Control.Feedback>
               </Form.Group>
 
               <Row className="mt-2">
+                {/* Amount */}
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Amount</Form.Label>
-                    <Form.Control value={amount} onChange={e => setAmount(e.target.value)} />
+                    <Form.Control
+                      value={amount}
+                      isInvalid={!!errors.amount}
+                      onChange={e => {
+                        setAmount(e.target.value);
+                        setErrors(prev => ({ ...prev, amount: null }));
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.amount}
+                    </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
+
+                {/* Points */}
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Points (comma separated, 1-4)</Form.Label>
-                    <Form.Control value={pointsStr} onChange={e => setPointsStr(e.target.value)} />
+                    <Form.Label>Points (comma separated)</Form.Label>
+                    <Form.Control
+                      value={pointsStr}
+                      isInvalid={!!errors.points}
+                      onChange={e => {
+                        setPointsStr(e.target.value);
+                        setErrors(prev => ({ ...prev, points: null }));
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.points}
+                    </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
               </Row>
 
+              {/* Checkboxes */}
               <Row className="mt-2">
                 <Col md={6}>
-                  <Form.Check type="checkbox" label="Is Home" checked={isHome} onChange={e => { setIsHome(e.target.checked); if (e.target.checked) setIsFreezone(false); }} />
+                  <Form.Check
+                    type="checkbox"
+                    label="Is Home"
+                    checked={isHome}
+                    onChange={e => {
+                      setIsHome(e.target.checked);
+                      if (e.target.checked) setIsFreezone(false);
+                      setErrors(prev => ({ ...prev, flags: null }));
+                    }}
+                  />
                 </Col>
                 <Col md={6}>
-                  <Form.Check type="checkbox" label="Is Freezone" checked={isFreezone} onChange={e => { setIsFreezone(e.target.checked); if (e.target.checked) setIsHome(false); }} />
+                  <Form.Check
+                    type="checkbox"
+                    label="Is Freezone"
+                    checked={isFreezone}
+                    onChange={e => {
+                      setIsFreezone(e.target.checked);
+                      if (e.target.checked) setIsHome(false);
+                      setErrors(prev => ({ ...prev, flags: null }));
+                    }}
+                  />
                 </Col>
               </Row>
+
+              {errors.flags && (
+                <div className="text-danger mt-1" style={{ fontSize: 13 }}>
+                  {errors.flags}
+                </div>
+              )}
             </Col>
 
+            {/* Image */}
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Image</Form.Label>
-                <div className="mb-2">
+
+                <div
+                  className={`mb-2 ${errors.image ? 'border border-danger' : ''}`}
+                  style={{
+                    borderRadius: 8,
+                    padding: 2
+                  }}
+                >
                   {preview ? (
-                    <img src={preview} alt="preview" style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 8 }} />
+                    <img
+                      src={preview}
+                      alt="preview"
+                      style={{
+                        width: '100%',
+                        height: 120,
+                        objectFit: 'cover',
+                        borderRadius: 6
+                      }}
+                    />
                   ) : (
-                    <div style={{height:120, background:'#f6f7fb', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center'}}><small className="text-muted">No image</small></div>
+                    <div
+                      style={{
+                        height: 120,
+                        background: '#f6f7fb',
+                        borderRadius: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <small className="text-muted">No image</small>
+                    </div>
                   )}
                 </div>
-                <Form.Control type="file" accept="image/*" onChange={handleFile} />
-                <small className="text-muted">Uploading a new image will replace the old one.</small>
+
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFile}
+                  isInvalid={!!errors.image}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.image}
+                </Form.Control.Feedback>
+
+                <small className="text-muted">
+                  Uploading a new image will replace the old one.
+                </small>
               </Form.Group>
             </Col>
           </Row>
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} disabled={submitting}>Cancel</Button>
+        <Button variant="secondary" onClick={onHide} disabled={submitting}>
+          Cancel
+        </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
           {submitting ? 'Saving...' : 'Save'}
         </Button>
@@ -292,69 +441,243 @@ const CommonPackageModal = ({ show, onHide, initial = null, onSubmit }) => {
 };
 
 /* ===================== CategoryPackageModal ===================== */
-const CategoryPackageModal = ({ show, onHide, initial = null, pageName = '', categoryKey = '', onSubmit }) => {
-  const [title, setTitle] = useState(initial?.title || '');
-  const [price, setPrice] = useState(initial?.price ?? '');
-  const [pointsStr, setPointsStr] = useState((initial?.points || []).map(p => p.text).join(','));
+const CategoryPackageModal = ({
+  show,
+  onHide,
+  initial = null,
+  pageName = '',
+  categoryKey = '',
+  onSubmit
+}) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [pointsStr, setPointsStr] = useState('');
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  React.useEffect(() => {
+  useEffect(() => {
     setTitle(initial?.title || '');
-    setPrice(initial?.price ?? '');
-    setPointsStr((initial?.points || []).map(p => p.text).join(','));
+    setDescription(initial?.description || '');
+    setAmount(initial?.amount ?? '');
+    setPointsStr(
+      (initial?.points || [])
+        .map(p => (typeof p === 'string' ? p : p.text))
+        .join(',')
+    );
+    setPreview(initial?.image || null);
+    setFile(null);
     setSubmitting(false);
+    setErrors({});
   }, [initial, show]);
 
+  const handleFile = (e) => {
+    const f = e.target.files?.[0];
+    setFile(f || null);
+
+    if (f) {
+      setPreview(URL.createObjectURL(f));
+      setErrors(prev => ({ ...prev, image: null }));
+    } else {
+      setPreview(initial?.iconUrl || null);
+    }
+  };
+
   const handleSubmit = async () => {
-    const points = (pointsStr || '').split(',').map(s => s.trim()).filter(Boolean);
-    if (!title) return alert('Title required');
-    if (points.length < 1 || points.length > 4) return alert('Points must be 1–4');
+    const newErrors = {};
+    const points = pointsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (!title) newErrors.title = 'Title is required';
+    if (!description) newErrors.description = 'Description is required';
+
+    if (amount === '' || Number.isNaN(Number(amount))) {
+      newErrors.amount = 'Enter a valid amount';
+    }
+
+    if (!points.length || points.length > 4) {
+      newErrors.points = 'Points must be between 1 and 4 items';
+    }
+
+    // Image required only on create
+    if (!initial && !file) {
+      newErrors.image = 'Image is required';
+    }
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await onSubmit({
-        id: initial?._id,
+        id: initial?.id,
         categoryKey,
         pageName,
         title,
-        price,
-        points
+        description,
+        amount,
+        points,
+        imageFile: file
       });
       onHide();
     } catch (err) {
-      console.error(err);
-      alert('Save failed');
+      toast.error(err?.message || "Submission failed");
+
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>{initial ? 'Edit Package' : `Create Package for ${pageName}`}</Modal.Title>
+        <Modal.Title>
+          {initial ? 'Edit Package' : `Create Package for ${pageName}`}
+        </Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Title</Form.Label>
-            <Form.Control value={title} onChange={e => setTitle(e.target.value)} />
-          </Form.Group>
+        <Form noValidate>
+          <Row className="g-3">
+            <Col md={8}>
+              {/* Title */}
+              <Form.Group>
+                <Form.Label>Title</Form.Label>
+                <Form.Control
+                  value={title}
+                  isInvalid={!!errors.title}
+                  onChange={e => {
+                    setTitle(e.target.value);
+                    setErrors(prev => ({ ...prev, title: null }));
+                  }}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.title}
+                </Form.Control.Feedback>
+              </Form.Group>
 
-          <Form.Group className="mt-2">
-            <Form.Label>Price</Form.Label>
-            <Form.Control value={price} onChange={e => setPrice(e.target.value)} />
-          </Form.Group>
+              {/* Description */}
+              <Form.Group className="mt-2">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={description}
+                  isInvalid={!!errors.description}
+                  onChange={e => {
+                    setDescription(e.target.value);
+                    setErrors(prev => ({ ...prev, description: null }));
+                  }}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.description}
+                </Form.Control.Feedback>
+              </Form.Group>
 
-          <Form.Group className="mt-2">
-            <Form.Label>Points (comma separated)</Form.Label>
-            <Form.Control value={pointsStr} onChange={e => setPointsStr(e.target.value)} />
-            <small className="text-muted">1–4 points.</small>
-          </Form.Group>
+              <Row className="mt-2">
+                {/* Amount */}
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Amount</Form.Label>
+                    <Form.Control
+                      value={amount}
+                      isInvalid={!!errors.amount}
+                      onChange={e => {
+                        setAmount(e.target.value);
+                        setErrors(prev => ({ ...prev, amount: null }));
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.amount}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+
+                {/* Points */}
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Points (comma separated)</Form.Label>
+                    <Form.Control
+                      value={pointsStr}
+                      isInvalid={!!errors.points}
+                      onChange={e => {
+                        setPointsStr(e.target.value);
+                        setErrors(prev => ({ ...prev, points: null }));
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.points}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Col>
+
+            {/* Image */}
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Image</Form.Label>
+
+                <div
+                  className={`mb-2 ${errors.image ? 'border border-danger' : ''}`}
+                  style={{ borderRadius: 8, padding: 2 }}
+                >
+                  {preview ? (
+                    <img
+                      src={preview}
+                      alt="preview"
+                      style={{
+                        width: '100%',
+                        height: 120,
+                        objectFit: 'cover',
+                        borderRadius: 6
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        height: 120,
+                        background: '#f6f7fb',
+                        borderRadius: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <small className="text-muted">No image</small>
+                    </div>
+                  )}
+                </div>
+
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  isInvalid={!!errors.image}
+                  onChange={handleFile}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.image}
+                </Form.Control.Feedback>
+
+                <small className="text-muted">
+                  Uploading a new image will replace the old one.
+                </small>
+              </Form.Group>
+            </Col>
+          </Row>
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} disabled={submitting}>Cancel</Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : 'Save'}</Button>
+        <Button variant="secondary" onClick={onHide} disabled={submitting}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+          {submitting ? 'Saving...' : 'Save'}
+        </Button>
       </Modal.Footer>
     </Modal>
   );
@@ -362,44 +685,61 @@ const CategoryPackageModal = ({ show, onHide, initial = null, pageName = '', cat
 
 /* ===================== Main Packages Page ===================== */
 const Packages = () => {
+  /* ---------------- Tabs ---------------- */
+  const [topActiveKey, setTopActiveKey] = useState("common");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState([])
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  /* ---------------- COMMON (UNCHANGED) ---------------- */
   const [commonPackages, setCommonPackages] = useState([]);
-  const [categories, setCategories] = useState([]); // array of category docs
   const [loadingCommon, setLoadingCommon] = useState(true);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-
-  // which top tab is active
-  const [topActiveKey, setTopActiveKey] = useState('common');
-
-  // selected category & page (sub-category)
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState(null);
-  const [selectedPageName, setSelectedPageName] = useState(null);
-
-  // modals state
-  const [commonModal, setCommonModal] = useState({ show: false, initial: null });
-  const [categoryModal, setCategoryModal] = useState({ show: false, initial: null, categoryKey: null, pageName: null });
-
   const [fetching, setFetching] = useState(false);
 
+  const [commonModal, setCommonModal] = useState({
+    show: false,
+    initial: null
+  });
+
+  /* ---------------- STATIC FREEZONES ---------------- */
+  const pages = STATIC_FREEZONES.freezones;
+
+  const [selectedPage, setSelectedPage] = useState(pages[0]);
+  const [selectedUrl, setSeletedUrl] = useState("jafza-freezone-dubai")
+
+  const [selectedItemId, setSelectedItemId] = useState(
+    pages[0]?.items?.[0]?.id || null
+  );
+
+  /* ---------------- CATEGORY PACKAGES (PER ITEM) ---------------- */
+  const [packagesByItem, setPackagesByItem] = useState({});
+
+  /* ---------------- CATEGORY MODAL ---------------- */
+  const [categoryModal, setCategoryModal] = useState({
+    show: false,
+    initial: null,
+    categoryKey: null,
+    pageName: null
+  });
+
+  /* ---------------- DERIVED ---------------- */
+  const selectedItem = useMemo(() => {
+    return selectedPage?.items?.find(i => i.id === selectedItemId);
+  }, [selectedPage, selectedItemId]);
+
+  const currentItemPackages = packagesByItem[selectedItemId] || [];
+
+  /* ---------------- EFFECTS ---------------- */
   useEffect(() => {
     fetchCommon();
-    fetchCategories();
   }, []);
 
-  // When categories load, set default selected category and first page
-  useEffect(() => {
-    if (categories.length && !selectedCategoryKey) {
-      setSelectedCategoryKey(categories[0].categoryKey);
-      const firstPage = categories[0].pages?.[0];
-      setSelectedPageName(firstPage?.pageName || null);
-    }
-  }, [categories]);
-
+  /* ================= COMMON API (UNCHANGED) ================= */
   const fetchCommon = async () => {
     setLoadingCommon(true);
     try {
       const res = await getAllCommonPackages();
-      const pkgs = unwrap(res) || [];
-      setCommonPackages(pkgs);
+      setCommonPackages(unwrap(res) || []);
     } catch (err) {
       console.error(err);
       setCommonPackages([]);
@@ -408,271 +748,453 @@ const Packages = () => {
     }
   };
 
-  const fetchCategories = async () => {
-    setLoadingCategories(true);
-    try {
-      const res = await getCategoryPackages();
-      const data = unwrap(res) || [];
-      setCategories(Array.isArray(data) ? data : [data].filter(Boolean));
-    } catch (err) {
-      console.error(err);
-      setCategories([]);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
+  const handleOpenCommonCreate = () =>
+    setCommonModal({ show: true, initial: null });
 
-  /* ------------ Common package handlers (create/edit/delete) ------------ */
-  const handleOpenCommonCreate = () => setCommonModal({ show: true, initial: null });
-  const handleOpenCommonEdit = (pkg) => setCommonModal({ show: true, initial: pkg });
-  const handleCloseCommonModal = () => setCommonModal({ show: false, initial: null });
+  const handleOpenCommonEdit = pkg =>
+    setCommonModal({ show: true, initial: pkg });
 
-  const handleSubmitCommon = async ({ id, title, description, amount, points, is_home, is_freezone, imageFile }) => {
+  const handleCloseCommonModal = () =>
+    setCommonModal({ show: false, initial: null });
+
+  const handleSubmitCommon = async data => {
     setFetching(true);
     try {
-      if (id) {
-        await updateCommonPackage(id, { title, description, amount, points, is_home, is_freezone, imageFile });
+      if (data.id) {
+        await updateCommonPackage(data.id, data);
       } else {
-        await createCommonPackage({ title, description, amount, points, is_home, is_freezone, imageFile });
+        await createCommonPackage(data);
       }
       await fetchCommon();
-    } catch (err) {
-      console.error(err);
-      throw err;
     } finally {
       setFetching(false);
     }
   };
 
-  const handleDeleteCommon = async (pkg) => {
+  const handleDeleteCommon = async pkg => {
     if (!window.confirm(`Delete "${pkg.title}"?`)) return;
     setFetching(true);
     try {
       await deleteCommonPackage(pkg._id);
       await fetchCommon();
-    } catch (err) {
-      console.error(err);
-      alert('Delete failed');
     } finally {
       setFetching(false);
     }
   };
 
-  /* ------------ Category handlers ------------ */
-  const handleSelectCategory = (categoryKey) => {
-    setSelectedCategoryKey(categoryKey);
-    const cat = categories.find(c => c.categoryKey === categoryKey);
-    const page = cat?.pages?.[0];
-    setSelectedPageName(page?.pageName || null);
+  /* ================= STATIC CATEGORY HANDLERS ================= */
+  const handleSelectPage = page => {
+    setSelectedPage(page);
+    setSeletedUrl(page.items[0].url)
+    setSelectedItemId(page.items?.[0]?.id || null);
   };
 
-  const handleSelectPage = (pageName) => setSelectedPageName(pageName);
+  const handleSelectItem = item => {
 
-  const currentCategory = useMemo(() => categories.find(c => c.categoryKey === selectedCategoryKey), [categories, selectedCategoryKey]);
-  const currentPage = useMemo(() => currentCategory?.pages?.find(p => p.pageName === selectedPageName), [currentCategory, selectedPageName]);
 
-  /* Create package in currently selected page */
+    setSeletedUrl(item.url)
+    setSelectedItemId(item.id);
+
+  };
+
+  /* ================= CATEGORY MODAL HANDLERS ================= */
   const handleOpenCreateCategoryPkg = () => {
-    if (!currentCategory || !selectedPageName) return alert('Select a Category and Page first');
-    setCategoryModal({ show: true, initial: null, categoryKey: currentCategory.categoryKey, pageName: selectedPageName });
+    if (!selectedPage || !selectedItem) {
+      alert("Select a page and freezone first");
+      return;
+    }
+    setSeletedUrl(selectedItem.url)
+
+    setCategoryModal({
+      show: true,
+      initial: null,
+      categoryKey: selectedPage.page, // e.g. Dubai Freezones
+      pageName: selectedItem.id       // e.g. jafza
+    });
   };
 
-  const handleOpenEditCategoryPkg = ({ categoryKey, pageName, pkg }) => {
-    setCategoryModal({ show: true, initial: pkg, categoryKey, pageName });
+  const handleCloseCategoryModal = () => {
+    setCategoryModal({
+      show: false,
+      initial: null,
+      categoryKey: null,
+      pageName: null
+    });
   };
 
-  const handleCloseCategoryModal = () => setCategoryModal({ show: false, initial: null, categoryKey: null, pageName: null });
-
-  const handleSubmitCategory = async ({ id, categoryKey, pageName, title, price, points }) => {
-    setFetching(true);
+  const handleSubmitCategory = async ({
+    id,
+    categoryKey,
+    pageName,
+    title,
+    amount,
+    points,
+    imageFile,
+    description
+  }) => {
     try {
-      if (id) {
-        await updateCategoryPackage({ categoryKey, pageName, packageId: id, title, price, points });
-      } else {
-        await createCategoryPackage({ categoryKey, pageName, title, price, points });
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("amount", amount);
+      formData.append("points", points);
+      formData.append("innerPage", selectedUrl);
+      formData.append("page", selectedPage.page);
+
+      if (imageFile) {
+        formData.append("image", imageFile);
       }
-      await fetchCategories();
-    } catch (err) {
-      console.error(err);
-      throw err;
-    } finally {
-      setFetching(false);
+
+      // 🔁 EDIT
+      let res;
+      if (id) {
+        res = await updateCategoryPackage(id, formData);
+      }
+      // ➕ CREATE
+      else {
+        res = await createCategoryPackage(formData);
+      }
+
+      if (res?.success) {
+        const pkg = res.data;
+        toast.success(res.message);
+
+        setPackagesByItem((prev) => ({
+          ...prev,
+          [pageName]: Array.isArray(prev[pageName])
+            ? id
+              ? prev[pageName].map((item) =>
+                item.id === id
+                  ? {
+                    ...item,
+                    title: pkg.title,
+                    description: pkg.description,
+                    amount: pkg.price,
+                    points: pkg.points,
+                    image: pkg.image,
+                    page: pkg.page,
+                    innerPage: pkg.innerPage,
+                  }
+                  : item
+              )
+              : [
+                {
+                  id: pkg._id,
+                  title: pkg.title,
+                  description: pkg.description,
+                  amount: pkg.price,
+                  points: pkg.points,
+                  image: pkg.image,
+                  page: pkg.page,
+                  innerPage: pkg.innerPage,
+                },
+                ...prev[pageName]
+              ]
+            : []
+        }));
+
+        handleCloseCategoryModal();
+      }
+    } catch (error) {
+      toast.error(error?.message || "Operation failed");
     }
   };
 
-  const handleDeleteCategoryPkg = async ({ categoryKey, pageName, pkg }) => {
-    if (!window.confirm(`Delete "${pkg.title}"?`)) return;
-    setFetching(true);
+
+  useEffect(() => {
+    const fetchCategoryPackages = async () => {
+      try {
+        if (!selectedPage?.page || !selectedUrl) return;
+
+        const res = await getCategoryPackages(
+          selectedPage.page,
+          selectedUrl
+        );
+
+        if (res?.success) {
+          setPackagesByItem(prev => ({
+            ...prev,
+            [selectedItemId]: res.data.map(pkg => ({
+              id: pkg._id,
+              title: pkg.title,
+              amount: pkg.price,
+              points: pkg.points,
+              image: pkg.image,
+              description: pkg.description,
+              page: pkg.page,
+              innerPage: pkg.innerPage,
+            }))
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (topActiveKey === "categories") {
+      fetchCategoryPackages();
+    }
+  }, [topActiveKey, selectedPage, selectedUrl, selectedItemId]);
+  const handleOpenCategoryEdit = pkg => {
+    setCategoryModal({
+      show: true,
+      initial: pkg,
+      categoryKey: selectedPage.page, // e.g. Dubai Freezones
+      pageName: selectedItem.id       // e.g. jafza
+    });
+  }
+
+  const confirmDelete = async () => {
+
     try {
-      await deleteCategoryPackage({ categoryKey, pageName, packageId: pkg._id });
-      await fetchCategories();
-    } catch (err) {
-      console.error(err);
-      alert('Delete failed');
+      setIsDeleting(true);
+
+
+      const res = await deleteCategoryPackage(selectedPackage.id);
+
+      if (res.success) {
+        toast.success(res.message);
+        setDeleteModal(!deleteModal)
+        setPackagesByItem((prev) => ({
+          ...prev,
+          [selectedItemId]: Array.isArray(prev[selectedItemId])
+            ? prev[selectedItemId].filter(
+              (item) => item.id !== selectedPackage.id
+            )
+            : []
+        }));
+      }
+    } catch (error) {
+      toast.error(error?.message || "Failed to delete package");
     } finally {
-      setFetching(false);
+      setIsDeleting(false);
     }
   };
 
-  /* ------------------ Render ------------------ */
+  /* ================= RENDER ================= */
   return (
     <>
       <PageBreadcrumb subName="Pages" title="Packages" />
       <PageMetaData title="Packages" />
 
-      {/* <Row className="align-items-center mb-3">
-        <Col>
-        <h4 className="mb-0">Packages</h4>
-        </Col>
-        <Col className="text-end">
-      
-          <Button variant="outline-secondary" className="me-2" onClick={() => { fetchCommon(); fetchCategories(); }}>
-            <IconifyIcon icon="bx:refresh" /> Refresh All
-          </Button>
-        </Col>
-      </Row> */}
-
-      <Tabs activeKey={topActiveKey} onSelect={(k) => setTopActiveKey(k)} className="mb-4">
+      <Tabs
+        activeKey={topActiveKey}
+        onSelect={k => setTopActiveKey(k)}
+        className="mb-4"
+      >
+        {/* ================= COMMON TAB (UNCHANGED) ================= */}
         <Tab
           eventKey="common"
-          title={<span><IconifyIcon icon="bx:box" className="me-1" /> Common Packages</span>}
+          title={
+            <span>
+              <IconifyIcon icon="bx:box" className="me-1" />
+              Common Packages
+            </span>
+          }
         >
-          {/* TAB HEADER for common tab */}
           <Row className="align-items-center mb-3">
             <Col>
-              <h4 className="mb-0">Common Packages</h4>
-              <p className="text-muted">Manage Home and Freezone packages</p>
+              <h4>Common Packages</h4>
             </Col>
             <Col className="text-end">
-              <Button variant="outline-secondary" className="me-2" onClick={() => { fetchCommon(); }}>
-                <IconifyIcon icon="bx:refresh" /> Refresh
+              <Button
+                className="me-2"
+                variant="outline-secondary"
+                onClick={fetchCommon}
+              >
+                Refresh
               </Button>
-              <Button variant="primary" onClick={handleOpenCommonCreate}>
-                <IconifyIcon icon="bx:plus" className="me-1" /> Add package
+              <Button onClick={handleOpenCommonCreate}>
+                Add Package
               </Button>
             </Col>
           </Row>
 
-          {loadingCommon ? <div className="text-center py-5"><Spinner animation="border" /></div> : (
+          {loadingCommon ? (
+            <Spinner />
+          ) : (
             <Row className="g-4">
-              {commonPackages.length ? commonPackages.map(pkg => (
-                <Col key={pkg._id} xs={12} sm={6} md={6} lg={4} xl={3}>
-                  <CommonPackageCard pkg={pkg} onEdit={handleOpenCommonEdit} onDelete={handleDeleteCommon} />
+              {commonPackages.map(pkg => (
+                <Col md={3} key={pkg._id}>
+                  <CommonPackageCard
+                    pkg={pkg}
+                    onEdit={handleOpenCommonEdit}
+                    onDelete={handleDeleteCommon}
+                  />
                 </Col>
-              )) : (
-                <Col xs={12}><p className="text-muted text-center">No common packages found</p></Col>
-              )}
+              ))}
             </Row>
           )}
         </Tab>
 
+        {/* ================= CATEGORIES (STATIC) ================= */}
         <Tab
           eventKey="categories"
-          title={<span><IconifyIcon icon="bx:category" className="me-1" /> Categories</span>}
+          title={
+            <span>
+              <IconifyIcon icon="bx:category" className="me-1" />
+              Categories
+            </span>
+          }
         >
-          {/* TAB HEADER for categories tab */}
-          <Row className="align-items-center mb-3">
-            <Col>
-              <h4 className="mb-0">Categories</h4>
-              <p className="text-muted">Manage nested Freezone category Packages</p>
+          <Row>
+            {/* LEFT – VERTICAL PAGES */}
+            <Col md={3}>
+              {pages.map(page => (
+                <Button
+                  key={page.page}
+                  className="w-100 mb-2 text-start"
+                  variant={
+                    page.page === selectedPage?.page
+                      ? "primary"
+                      : "outline-secondary"
+                  }
+                  onClick={() => handleSelectPage(page)}
+                >
+                  <strong>{page.page}</strong>
+                  <Badge bg="light" text="dark" className="float-end">
+                    {page.items.length}
+                  </Badge>
+                </Button>
+              ))}
             </Col>
-            <Col className="text-end">
-              <Button variant="outline-secondary" className="me-2" onClick={() => fetchCategories()}>
-                <IconifyIcon icon="bx:refresh" /> Refresh
-              </Button>
-              <Button variant="primary" onClick={handleOpenCreateCategoryPkg}>
-                <IconifyIcon icon="bx:plus" className="me-1" /> Add package
-              </Button>
+
+            {/* RIGHT – ITEMS + ADD BUTTON + PACKAGES */}
+            <Col md={9}>
+              <h4 className="mb-3">{selectedPage?.page}</h4>
+
+              {/* HORIZONTAL ITEMS */}
+              <div
+                className="mb-3"
+                style={{ whiteSpace: "nowrap", overflowX: "auto" }}
+              >
+                {selectedPage?.items.map(item => {
+                  const count = packagesByItem?.[item.id]?.length ?? 0;
+
+                  return (
+                    <button
+                      key={item.id}
+                      className={`btn me-2 ${item.id === selectedItemId
+                        ? "btn-primary"
+                        : "btn-outline-secondary"
+                        }`}
+                      onClick={() => handleSelectItem(item)}
+                    >
+                      {item.title}
+
+                      <Badge bg="light" text="dark" className="float-end ms-2">
+                        {count}
+                      </Badge>
+                    </button>
+                  );
+                })}
+
+
+              </div>
+
+              {/* ADD PACKAGE BUTTON */}
+              {selectedItem && (
+                <div className="text-end mb-3">
+                  <Button onClick={handleOpenCreateCategoryPkg}>
+                    <IconifyIcon icon="bx:plus" className="me-1" />
+                    Add Package
+                  </Button>
+                </div>
+              )}
+
+              {/* PACKAGES LIST */}
+              <Row className="g-3">
+                {currentItemPackages.length > 0 ? (
+                  currentItemPackages.map(pkg => (
+                    <Col md={4} key={pkg.id}>
+                      <Card style={cardStyles.card} className="h-100">
+                        {pkg.image ? (
+                          <div style={cardStyles.imgWrapper}>
+                            <img
+                              src={pkg.image}
+                              alt={pkg.title}
+                              loading="lazy"
+                              style={cardStyles.img}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              ...cardStyles.imgWrapper,
+                              fontSize: 20,
+                              color: "#6c757d",
+                            }}
+                            className="d-flex align-items-center justify-content-center"
+                          >
+                            <IconifyIcon icon="bx:image" className="fs-2" />
+                          </div>
+                        )}
+
+
+                        <Card.Body className="d-flex flex-column">
+                          <div style={cardStyles.titleRow}>
+                            <div>
+                              <h6 className="mb-0 text-uppercase">{pkg.title}</h6>
+                              <small className="text-muted">{pkg.description}</small>
+                            </div>
+                          </div>
+
+                          <div className="mt-3">
+                            <div style={cardStyles.price}>
+                              {currency}
+                              {pkg.amount}
+                            </div>
+
+                            <hr />
+
+                            <ul style={cardStyles.pointsList}>
+                              {Array.isArray(pkg.points) && pkg.points.length > 0 ? (
+                                pkg.points.map((pt, i) => (
+                                  <li key={i} className="text-dark small">
+                                    <IconifyIcon
+                                      icon="bx:check-circle"
+                                      className="text-primary me-2"
+                                    />
+                                    {pt}
+                                  </li>
+                                ))
+                              ) : (
+                                <li className="text-muted small">No features listed</li>
+                              )}
+
+                            </ul>
+                          </div>
+
+                          <div style={cardStyles.actionRow}>
+                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenCategoryEdit(pkg)}>Edit</Button>
+                            <Button variant="outline-danger" size="sm" onClick={() => { setDeleteModal(true), setSelectedPackage(pkg) }}>Delete</Button>
+                          </div>                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))
+                ) : (
+                  <Col>
+                    <p className="text-muted mb-0">No packages added yet.</p>
+                  </Col>
+                )}
+              </Row>
+
             </Col>
           </Row>
-
-          {loadingCategories ? <div className="text-center py-5"><Spinner animation="border" /></div> : categories.length === 0 ? (
-            <p className="text-muted">No categories configured.</p>
-          ) : (
-            <Row>
-              {/* left: categories list */}
-              <Col xs={12} md={4} lg={3} className="mb-3">
-                <div className="mb-3">
-                  {/* <h4 className="mb-2">Categories</h4> */}
-                  {categories.map(cat => (
-                    <Button
-                      key={cat.categoryKey}
-                      variant={cat.categoryKey === selectedCategoryKey ? 'primary' : 'outline-secondary'}
-                      className="w-100 mb-2 text-start"
-                      onClick={() => handleSelectCategory(cat.categoryKey)}
-                    >
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="my-2">
-                          <strong>{cat.categoryTitle}</strong>
-                          {/* <div className="text-muted small">{cat.categoryKey}</div> */}
-                        </div>
-                        <div><Badge bg="light" text="dark">{cat.pages?.length ?? 0}</Badge></div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </Col>
-
-              {/* right: pages (tabs) + packages */}
-              <Col xs={12} md={8} lg={9}>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <h4 className="mb-0">{currentCategoryTitle(categories, selectedCategoryKey)}</h4>
-                    {/* <small className="text-muted">{selectedCategoryKey}</small> */}
-                  </div>
-                </div>
-
-                {currentCategoryExists(categories, selectedCategoryKey) ? (
-                  <>
-                    <div className="mb-3">
-                      <div style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
-                        {currentCategoryPages(categories, selectedCategoryKey).map((page) => (
-                          <button
-                            key={page.pageName}
-                            onClick={() => handleSelectPage(page.pageName)}
-                            className={`btn me-2 ${page.pageName === selectedPageName ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            style={{ whiteSpace: 'nowrap' }}
-                          >
-                            {page.pageName}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* packages grid for selected page */}
-                    <div>
-                      <Row className="g-4 ">
-                        {currentPagePackages(categories, selectedCategoryKey, selectedPageName).length ? (
-                          currentPagePackages(categories, selectedCategoryKey, selectedPageName).map(pkg => (
-                            <Col key={pkg._id} xs={12} sm={6} md={6} lg={4}>
-                              <CategoryPackageCard
-                                pkg={pkg}
-                                onEdit={() => handleOpenEditCategoryPkg({ categoryKey: selectedCategoryKey, pageName: selectedPageName, pkg })}
-                                onDelete={() => handleDeleteCategoryPkg({ categoryKey: selectedCategoryKey, pageName: selectedPageName, pkg })}
-                              />
-                            </Col>
-                          ))
-                        ) : (
-                          <Col xs={12}><p className="text-muted">No packages for this page.</p></Col>
-                        )}
-                      </Row>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-muted">Select a category to see its pages</p>
-                )}
-              </Col>
-            </Row>
-          )}
         </Tab>
       </Tabs>
 
-      {/* Modals */}
+      {/* ================= MODALS ================= */}
       <CommonPackageModal
         show={commonModal.show}
         initial={commonModal.initial}
         onHide={handleCloseCommonModal}
         onSubmit={handleSubmitCommon}
+        loading={fetching}
       />
 
       <CategoryPackageModal
@@ -683,10 +1205,16 @@ const Packages = () => {
         onHide={handleCloseCategoryModal}
         onSubmit={handleSubmitCategory}
       />
+      {deleteModal && (
+        <DeleteConfrimModal
+          confirmDelete={confirmDelete}
+          isDeleting={isDeleting}
+          handleModal={() => setDeleteModal(false)}
+        />
+      )}
     </>
   );
 };
-
 /* ---------------------- Helper render helpers used above --------------------- */
 function currentCategoryPages(categories, selectedCategoryKey) {
   const cat = categories.find(c => c.categoryKey === selectedCategoryKey);

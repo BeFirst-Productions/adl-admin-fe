@@ -2,7 +2,17 @@ import { Link } from 'react-router-dom';
 import { Dropdown, DropdownDivider, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } from 'react-bootstrap';
 import IconifyIcon from '@/components/wrappers/IconifyIcon';
 import avatar1 from '@/assets/images/users/avatar-1.jpg';
+import { useAuth } from '@/context/AuthContext';
 const ProfileDropdown = () => {
+  const {user,logout}=useAuth()
+   const handlelogOut = async () => {
+    try {
+      
+      await logout(); // ✅ ACTUALLY LOGS USER OUT
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return <Dropdown className="topbar-item" align={'end'}>
       <DropdownToggle as="button" type="button" className="topbar-button content-none" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <span className="d-flex align-items-center">
@@ -10,8 +20,8 @@ const ProfileDropdown = () => {
         </span>
       </DropdownToggle>
       <DropdownMenu>
-        <DropdownHeader as="h6">Welcome Gaston!</DropdownHeader>
-        <DropdownItem as={Link} to="/pages/profile">
+        <DropdownHeader as="h6">Welcome {user.name}!</DropdownHeader>
+        {/* <DropdownItem as={Link} to="/pages/profile">
           <IconifyIcon icon="bx:user-circle" className="text-muted fs-18 align-middle me-1" />
           <span className="align-middle">Profile</span>
         </DropdownItem>
@@ -30,9 +40,9 @@ const ProfileDropdown = () => {
         <DropdownItem as={Link} to="/auth/lock-screen">
           <IconifyIcon icon="bx:lock" className="text-muted fs-18 align-middle me-1" />
           <span className="align-middle">Lock screen</span>
-        </DropdownItem>
+        </DropdownItem> */}
         <DropdownDivider className="dropdown-divider my-1" />
-        <DropdownItem as={Link} className="text-danger" to="/auth/sign-in">
+        <DropdownItem  className="text-danger" onClick={handlelogOut}>
           <IconifyIcon icon="bx:log-out" className="fs-18 align-middle me-1" />
           <span className="align-middle">Logout</span>
         </DropdownItem>
