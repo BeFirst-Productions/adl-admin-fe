@@ -8,9 +8,22 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src")
-    }
+    },
+    extensions: ['.mjs', '.js', '.jsx', '.json', '.ts', '.tsx']
   },
-    optimizeDeps: {
+  optimizeDeps: {
     include: ['jsvectormap']
+  },
+  build: {
+    commonjsOptions: {
+      include: [/jsvectormap/, /node_modules/]
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'jsvectormap': ['jsvectormap']
+        }
+      }
+    }
   }
 });
