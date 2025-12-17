@@ -21,6 +21,7 @@ const Blogs = lazy(() => import('@/app/(admin)/apps/contacts/page'))
 const EcommerceProductDetails = lazy(() => import('@/app/(admin)/ecommerce/products/[productId]/page'))
 const EcommerceProductCreate = lazy(() => import('@/app/(admin)/ecommerce/products/create/page'))
 const Invoices = lazy(() => import('@/app/(admin)/invoices/page'))
+const Settings = lazy(() => import('@/app/(admin)/settings/Page'))
 
 const AppRouter = (props) => {
   const { isAuthenticated } = useAuthContext()
@@ -146,6 +147,14 @@ const AppRouter = (props) => {
           element={
             <AdminLayout>
               <Pricing />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <AdminLayout>
+              <Settings />
             </AdminLayout>
           }
         />

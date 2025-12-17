@@ -11,14 +11,6 @@ export default function Home() {
       <PageBreadcrumb title="Analytics" subName="Dashboards" />
       <PageMetaData title="Analytics" />
 
-      {/* <Row>
-        <Col xxl={3}>
-          <Stats />
-        </Col>
-        <Col xxl={9}>
-          <Conversions />
-        </Col>
-      </Row> */}
       <Row>
         <Col xs={12}>
           <SessionsByCountry />

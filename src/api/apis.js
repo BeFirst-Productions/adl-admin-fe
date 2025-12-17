@@ -480,3 +480,108 @@ export const deleteGalleryImage = async (id) => {
 
     }
 }
+
+
+
+
+export const getOverview = async (days = 7) => {
+  const res = await axiosInstance.get(`/analytics/overview?days=${days}`);
+  return res.data;
+};
+
+
+export const getRealtime = async (limit = 50) => {
+  const res = await axiosInstance.get(`/analytics/realtime?limit=${limit}`);
+  return res.data;
+};
+
+export async function downloadAnalyticsCsv({ start, end, dimensions = "pagePath", metrics = "screenPageViews" }) {
+  const url = `/analytics/export?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&dimensions=${encodeURIComponent(dimensions)}&metrics=${encodeURIComponent(metrics)}`;
+  const response = await axiosInstance.get(url, { responseType: "blob" });
+
+}
+
+//===== Analytics =====//
+
+export const getPerformance = async (range = '7d') => {
+  const res = await axiosInstance.get(`/analytics/performance?range=${encodeURIComponent(range)}`);
+  return res.data;
+};
+
+export const getPerformanceTrend = async (range = '7d', metric = 'screenPageViews') => {
+  const res = await axiosInstance.get(`/analytics/performance/trend?range=${encodeURIComponent(range)}&metric=${encodeURIComponent(metric)}`);
+
+  return res.data;
+};
+
+
+export const getKpis = async (days = 28) => {
+  const res = await axiosInstance.get(`/analytics/kpis?days=${days}`);
+  return res.data; 
+};
+
+
+export const getSessionsByCountry = async (
+  range = '3mo', 
+  topN = 250, 
+  metric = 'activeUsers'
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/analytics/sessions-by-country`,
+      {
+        params: { range, topN, metric },
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('❌ API Error (getSessionsByCountry):', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const getTopPages = async ({
+  days = 28,
+  limit = 10
+}) => {
+  const res = await axiosInstance.get(
+    `/analytics/top-pages?days=${days}&limit=${limit}`
+  );
+  return res.data.data;
+};
+
+
+export const getActiveUsersByDevice = async ({
+range = "28d"
+}) => {
+  try {
+      const res = await axiosInstance.get(
+     `/analytics/active-users-by-device`, { params: { range } }
+  );
+  return res.data.data;
+    
+  } catch (error) {
+      console.error( error.response?.data || error.message);
+    throw error;
+  }
+
+};
+
+
+export const getStorageUsage = async () => {
+  try {
+      const res = await axiosInstance.get("/settings/storage");
+  return res.data.data;
+  } catch (error) {
+        console.error( error.response?.data || error.message);
+    throw error;
+  }
+
+};
+
