@@ -135,48 +135,49 @@ const MetaDataForm = forwardRef(({ updateBlogData, blogData }, ref) => {
             placeholder="Enter Meta Title"
             containerClassName="mb-1"
           />
-        
+
         </Col>
 
         {/* KEYWORDS */}
-     {/* KEYWORDS FIELD */}
-<Col md={6}>
-  <label className="form-label">Meta Keywords</label>
+        {/* KEYWORDS FIELD */}
+        <Col md={6}>
+          <label className="form-label">Meta Keywords</label>
 
-  <input
-    type="text"
-    className="form-control"
-    placeholder="keyword1, keyword2"
-    value={keywordInput}
-    {...register("keywords")}
-    onChange={handleInputChange}
-  />
+          <input
+            type="text"
+            className="form-control"
+            placeholder="keyword1, keyword2"
+            value={keywordInput}
+            {...register("keywords")}
+            onChange={handleInputChange}
+          />
 
-  <div className="d-flex gap-2 flex-wrap mt-2">
-    {keywordList.map((kw, i) => (
-      <span key={i} className="badge bg-primary">
-        {kw}
-        <button
-          type="button"
-          onClick={() => removeKeyword(kw)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'white',
-            marginLeft: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          ×
-        </button>
-      </span>
-    ))}
-  </div>
+          <div className="d-flex gap-2 flex-wrap mt-2">
+            {keywordList.map((kw, i) => (
+              <span key={i} className="badge bg-primary"                     style={{ fontSize: "14px", padding: "8px 12px", borderRadius: "8px" }}
+>
+                {kw}
+                <button
+                  type="button"
+                  onClick={() => removeKeyword(kw)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    marginLeft: '5px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
 
-  {errors.keywords && (
-    <p className="text-danger small mt-1">{errors.keywords.message}</p>
-  )}
-</Col>
+          {errors.keywords && (
+            <p className="text-danger small mt-1">{errors.keywords.message}</p>
+          )}
+        </Col>
 
       </Row>
 
@@ -191,7 +192,7 @@ const MetaDataForm = forwardRef(({ updateBlogData, blogData }, ref) => {
             containerClassName="mt-2"
           />
 
-       
+
         </Col>
       </Row>
 

@@ -82,8 +82,17 @@ export const MENU_ITEMS = [
   //   label: 'Blogs',
   //   children: [
   {
+    key: 'herosection',
+    icon: 'mdi:home-outline',
+    label: 'Herosection',
+    url: '/herosection',
+    //     parentKey: 'blogs'
+    //   }
+    // ]
+  },
+  {
     key: 'blogs',
-    icon: 'mdi:message-text-outline',
+    icon: 'mdi:post-outline',
     label: 'Blogs',
     url: '/blogs',
     //     parentKey: 'blogs'

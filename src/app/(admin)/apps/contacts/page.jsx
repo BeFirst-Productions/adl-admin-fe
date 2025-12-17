@@ -35,7 +35,7 @@ const BlogCard = ({ post, onDelete, onEdit, onView }) => {
           </div>
 
           {/* Title */}
-          <h4 className="fs-18 mt-2 text-white fw-semibold">{title}</h4>
+          <h4 className="fs-18 mt-2  fw-semibold">{title}</h4>
 
           {/* Date */}
           <div className="text-muted small mb-2">
@@ -48,14 +48,14 @@ const BlogCard = ({ post, onDelete, onEdit, onView }) => {
           </div>
 
           {/* Excerpt */}
-          <p className="text-white" style={{ minHeight: 60 }}>
+          <p className="" style={{ minHeight: 60 }}>
             {excerpt}
           </p>
 
           {/* Action Buttons */}
           <div className="d-flex justify-content-center gap-2 mt-2">
             <Button
-              variant="soft-primary"
+              variant="outline-info"
               size="sm"
               className="px-3 py-2"
               onClick={() => onView(post)}
@@ -64,7 +64,7 @@ const BlogCard = ({ post, onDelete, onEdit, onView }) => {
             </Button>
 
             <Button
-              variant="soft-primary"
+              variant="outline-primary"
               size="sm"
               className="px-3 py-2"
               onClick={() => onEdit(post)}
@@ -73,7 +73,7 @@ const BlogCard = ({ post, onDelete, onEdit, onView }) => {
             </Button>
 
             <Button
-              variant="soft-danger"
+              variant="outline-danger"
               size="sm"
               className="px-3 py-2"
               onClick={() => onDelete(post)}
@@ -100,7 +100,7 @@ const Blogs = () => {
 
   const navigate = useNavigate();
 
-  const categories = ["all", "service", "freezone", "visa"];
+  const categories = ["all", "service", "license", "visa","freezone"];
 
   // Fetch Blogs
   const fetchBlogs = async () => {

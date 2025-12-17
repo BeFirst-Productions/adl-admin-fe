@@ -21,6 +21,7 @@ const CreateBlogForms = () => {
 
   const [activeStep, setActiveStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,7 +43,8 @@ const CreateBlogForms = () => {
     metaDescription: '',
     canonical: '',
     subCategory: '',
-    category: ''
+    category: '',
+    url: ''
   });
 
   useEffect(() => {
@@ -58,7 +60,8 @@ const CreateBlogForms = () => {
         metaDescription: editingBlog.metaDescription,
         canonical: editingBlog.canonical,
         subCategory: editingBlog.subCategory,
-        category: editingBlog.category
+        category: editingBlog.category,
+        url: editingBlog.url
       });
     }
   }, [isEditMode, editingBlog]);
@@ -99,7 +102,8 @@ const CreateBlogForms = () => {
       (blogData.image || blogData.existingImage) &&
       blogData.metaTitle.trim() &&
       blogData.metaKeywords.trim() &&
-      blogData.metaDescription.trim()
+      blogData.metaDescription.trim() &&
+      blogData.url.trim()
     );
   };
 
@@ -116,7 +120,8 @@ const CreateBlogForms = () => {
       const formData = new FormData();
 
       Object.entries(blogData).forEach(([key, value]) => {
-        if (key === "image") return; // handled later
+        if (key === "image") return; 
+        // handled later
         formData.append(key, value);
       });
 
@@ -132,11 +137,34 @@ const CreateBlogForms = () => {
         navigate("/blogs");
       }
     } catch (err) {
-      toast.error("Error saving blog. Try again!");
-    } finally {
-      setIsSubmitting(false);
-    }
+      const errorMsg = err?.response?.data?.message || err.message;
+
+      toast.error(errorMsg || "Error saving blog. Try again!");
+      let newErrors = {};
+
+      // URL related error
+      if (errorMsg.includes("URL") || errorMsg.includes("exists")) {
+        newErrors.url = errorMsg;
+      }
+
+      // Subcategory limit error
+      if (errorMsg.includes("Only") && errorMsg.includes("blogs")) {
+        newErrors.subCategory = errorMsg;
+      }
+
+      // Required field errors
+      if (errorMsg.includes("required")) {
+        newErrors.general = errorMsg;
+      }
+
+      // Save errors so form shows them immediately
+      setFormErrors(newErrors);
+
+      // Move back to Step 1 always for validation issues
+      setActiveStep(1);
+    } finally { setIsSubmitting(false); }
   };
+
 
   return (
     <>
@@ -176,6 +204,7 @@ const CreateBlogForms = () => {
                 ref={step.index === 1 ? generalRef : step.index === 3 ? metaRef : null}
                 updateBlogData={updateBlogData}
                 blogData={blogData}
+                formErrors={formErrors}  //
                 error={activeStep === 2 && (!blogData.image && !blogData.existingImage)
                   ? "Image is required"
                   : null}

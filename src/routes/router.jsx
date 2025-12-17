@@ -2,13 +2,16 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthLayout from '@/layouts/AuthLayout'
 import { useAuthContext } from '@/context/useAuthContext'
 import { appRoutes, authRoutes } from '@/routes/index'
+import { lazy } from 'react';
+import ProtectedRoute from './ProtectedRoute';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import LoginProtectRoute from './LoginProtectRoute';
+import HeroSectionManagement from '@/app/(admin)/HeroSection/HeroSectionManagement';
 import AdminLayout from '@/layouts/AdminLayout'
 import SignIn from '@/app/(other)/auth/sign-in/page'
-import { lazy } from 'react'
 import FAQManagement from '@/app/(admin)/faq/page'
 import 'react-toastify/dist/ReactToastify.css'
 import EnquiryManagement from '@/app/(admin)/enquiry/EnquiryManagement'
-import PrivateRoute from '@/components/private/PrivateRoute'
 const Pricing = lazy(() => import('@/app/(admin)/pages/pricing/page'))
 import SeoLayout from '@/app/(admin)/seo/SeoLayout'
 const Cards = lazy(() => import('@/app/(admin)/ui/cards/page'))
@@ -23,126 +26,137 @@ const EcommerceProductCreate = lazy(() => import('@/app/(admin)/ecommerce/produc
 const Invoices = lazy(() => import('@/app/(admin)/invoices/page'))
 const Settings = lazy(() => import('@/app/(admin)/settings/Page'))
 
-const AppRouter = (props) => {
-  const { isAuthenticated } = useAuthContext()
-  return (
-    <>
+const AppRouter = props => {
+  const {
+    isAuthenticated
+  } = useAuthContext();
+  return (<>
+
+    <AuthProvider>
+
       <Routes>
-        <Route
-          path="/login"
-          element={
-            <AuthLayout>
-              <SignIn />
-            </AuthLayout>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <AdminLayout>
-              <Dashboard />
-            </AdminLayout>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <AdminLayout>
-              <Analytics />
-            </AdminLayout>
-          }
-        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route path="/login" element={<LoginProtectRoute><AuthLayout><SignIn /></AuthLayout></LoginProtectRoute>} />
+        <Route path="/" element={<ProtectedRoute>
+          <AdminLayout><Dashboard /></AdminLayout></ProtectedRoute>} />
 
         <Route
           path="/user-management"
           element={
-            <AdminLayout>
-              <UserManagement />
-            </AdminLayout>
+            <ProtectedRoute allowedRoles={["superadmin"]}>
+              <AdminLayout>
+                <UserManagement />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user-management/add"
           element={
-            <AdminLayout>
-              <UserCreation />
-            </AdminLayout>
+            <ProtectedRoute allowedRoles={["superadmin"]}>
+
+              <AdminLayout>
+
+                <UserCreation />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/faqs"
           element={
-            <AdminLayout>
-              <FAQManagement />
-            </AdminLayout>
+            <ProtectedRoute>
+
+              <AdminLayout>
+
+                <FAQManagement />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/enquiry"
           element={
-            <AdminLayout>
-              <EnquiryManagement />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+
+                <EnquiryManagement />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/blogs"
           element={
-            <AdminLayout>
-              <Blogs />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <Blogs />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/blogs/details/:blogId"
           element={
-            <AdminLayout>
-              <EcommerceProductDetails />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductDetails />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/blogs/add-blog"
           element={
-            <AdminLayout>
-              <EcommerceProductCreate />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductCreate />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/blogs/edit-blog/:blogId"
           element={
-            <AdminLayout>
-              <EcommerceProductCreate />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <EcommerceProductCreate />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/newsletter/subscribers"
           element={
-            <AdminLayout>
-              <Invoices />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <Invoices />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/seo"
           element={
-            <AdminLayout>
-              <SeoLayout />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <SeoLayout />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/gallery"
           element={
-            <AdminLayout>
-              <Cards />
-            </AdminLayout>
+            <ProtectedRoute>
+              <AdminLayout>
+                <Cards />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
-
-        <Route
+         <Route
           path="/packages"
           element={
             <AdminLayout>
@@ -151,15 +165,32 @@ const AppRouter = (props) => {
           }
         />
         <Route
+          path="/herosection"
+          element={
+            <ProtectedRoute allowedRoles={["superadmin"]}>
+              <AdminLayout>
+                <HeroSectionManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <AdminLayout>
               <Settings />
-            </AdminLayout>
-          }
-        />
+            </AdminLayout>}/>
+        <Route
+          path="/analytics"
+          element={
+            <AdminLayout>
+              <Analytics />
+            </AdminLayout>}/>
       </Routes>
-    </>
-  )
-}
-export default AppRouter
+    </AuthProvider>
+
+  </>)
+
+
+};
+export default AppRouter;
