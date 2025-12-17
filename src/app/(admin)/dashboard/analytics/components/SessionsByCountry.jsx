@@ -23,7 +23,7 @@ import { useSessionsByCountry } from "@/hooks/useSessionsByCountry";
 
 // CRITICAL: Import jsvectormap properly
 import jsVectorMap from "jsvectormap";
-import "jsvectormap/dist/css/jsvectormap.min.css";
+import "jsvectormap/dist/css/jsvectormap.css";
 
 // CRITICAL: Import world map data
 // The map data must be imported AFTER jsVectorMap core
@@ -33,9 +33,9 @@ const loadWorldMap = async () => {
     try {
       await import("jsvectormap/dist/maps/world.js");
       worldMapLoaded = true;
-      console.log("✓ World map data loaded");
+      // console.log("✓ World map data loaded");
     } catch (error) {
-      console.error("Failed to load world map:", error);
+      throw("Failed to load world map:", error);
     }
   }
 };
