@@ -23,7 +23,7 @@ import { useSessionsByCountry } from "@/hooks/useSessionsByCountry";
 
 // CRITICAL: Import jsvectormap properly
 import jsVectorMap from "jsvectormap";
-import "jsvectormap/dist/css/jsvectormap.min.css";
+
 
 // CRITICAL: Import world map data
 // The map data must be imported AFTER jsVectorMap core
@@ -33,9 +33,9 @@ const loadWorldMap = async () => {
     try {
       await import("jsvectormap/dist/maps/world.js");
       worldMapLoaded = true;
-      console.log("✓ World map data loaded");
+      // console.log("✓ World map data loaded");
     } catch (error) {
-      console.error("Failed to load world map:", error);
+      throw("Failed to load world map:", error);
     }
   }
 };
@@ -87,11 +87,55 @@ export default function SessionsByCountry({
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
+
+const {
+  data: rows = [],
+  isLoading: loading,
+  error,
+} = useSessionsByCountry({ range, metric, topN });
+
+useEffect(() => {
+  // Load CSS from CDN if not already loaded
+  const existingLink = document.querySelector('link[href*="jsvectormap"]');
+  if (!existingLink) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/jsvectormap/dist/css/jsvectormap.min.css';
+    document.head.appendChild(link);
+  }
+  
+  // Add custom tooltip CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    .jvm-tooltip {
+      position: absolute;
+      display: none;
+      background-color: #1F2937 !important;
+      color: white !important;
+      border-radius: 8px !important;
+      padding: 12px !important;
+      font-family: inherit !important;
+      font-size: 13px !important;
+      z-index: 1000 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      border: 1px solid #374151 !important;
+      max-width: 220px !important;
+      pointer-events: none !important;
+    }
+    .jvm-tooltip.active {
+      display: block !important;
+    }
+    .jvm-container {
+      position: relative !important;
+    }
+  `;
+  document.head.appendChild(style);
+}, []);
+
   // Load world map on component mount
   useEffect(() => {
     loadWorldMap().then(() => setMapReady(true));
   }, []);
-
   // -----------------------------
   // FETCH DATA
   // -----------------------------
@@ -139,11 +183,7 @@ export default function SessionsByCountry({
   //     active = false;
   //   };
   // }, [range, metric, topN]);
-const {
-  data: rows = [],
-  isLoading: loading,
-  error,
-} = useSessionsByCountry({ range, metric, topN });
+
 
   // -----------------------------
   // CALCULATIONS
