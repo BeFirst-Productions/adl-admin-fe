@@ -343,7 +343,7 @@ export const updateCommonPackage = async (id, { title, description, amount, poin
   }
 }
 
-export const deleteCommonPackage = async (id) => {
+export const deleteCommonpackage = async (id) => {
   try {
     const res = await axiosInstance.delete(`/packages/common/${id}`)
     return res.data
