@@ -65,10 +65,14 @@ const HeroSectionManagement = () => {
     }
 
     if (name === "buttonUrl") {
-      if (safeValue && !/^\/|https?:\/\//.test(safeValue)) {
-        error = "Enter a valid URL (relative or absolute)";
-      }
-    }
+  if (
+    safeValue &&
+    !/^(#|\/|https?:\/\/)/.test(safeValue)
+  ) {
+    error = "Enter a valid URL (relative, absolute, or #)";
+  }
+}
+
 
     setErrors((prev) => ({
       ...prev,
@@ -125,9 +129,14 @@ const HeroSectionManagement = () => {
       }
 
       if (key === "buttonUrl") {
-        if (value && !/^\/|https?:\/\//.test(value))
-          error = "Enter a valid URL";
-      }
+  if (
+    value &&
+    !/^(#|\/|https?:\/\/)/.test(value)
+  ) {
+    error = "Enter a valid URL";
+  }
+}
+
 
       if (error) valid = false;
       newErrors[key] = error;
