@@ -10,7 +10,7 @@ import {
   getAllCommonPackages,
   createCommonPackage,
   updateCommonPackage,
-  deleteCommonPackage,
+  deleteCommonpackage,
   getCategoryPackages,
   createCategoryPackage,
   updateCategoryPackage,
@@ -81,52 +81,169 @@ const unwrap = (res) => {
 const CommonPackageCard = ({ pkg, onEdit, onDelete }) => {
   const points = (pkg.points || []).map(p => typeof p === 'string' ? p : p.text);
   return (
-    <Card style={cardStyles.card} className="h-100">
+   <Card
+  className="h-100 border-0 overflow-hidden"
+  style={{
+    borderRadius: 20,
+    boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
+    transition: "all 0.35s ease",
+  }}
+  onMouseEnter={(e) =>
+    (e.currentTarget.style.transform = "scale(1.02)")
+  }
+  onMouseLeave={(e) =>
+    (e.currentTarget.style.transform = "scale(1)")
+  }
+>
+  {/* ================= HEADER ================= */}
+  <div
+    style={{
+      height: 110,
+      background: "linear-gradient(135deg, #1e293b, #0f172a)", // admin panel style
+      position: "relative",
+    }}
+  >
+    {/* LOGO */}
+    <div
+      style={{
+        position: "absolute",
+        bottom: -45,
+        left: 24,
+        width: 90,
+        height: 90,
+        borderRadius: "50%",
+        background: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 8px 22px rgba(0,0,0,0.18)",
+      }}
+    >
       {pkg.iconUrl ? (
-        <div style={cardStyles.imgWrapper}>
-          <img src={pkg.iconUrl} alt={pkg.title} style={cardStyles.img} />
-        </div>
+        <img
+          src={pkg.iconUrl}
+          alt={pkg.title}
+          style={{
+            width: 55,
+            height: 55,
+            objectFit: "contain",
+          }}
+        />
       ) : (
-        <div style={{ ...cardStyles.imgWrapper, fontSize: 20, color: '#6c757d' }}>
-          <IconifyIcon icon="bx:image" className="fs-2" />
-        </div>
+        <IconifyIcon
+          icon="bx:image"
+          style={{ fontSize: 36 }}
+          className="text-primary"
+        />
       )}
+    </div>
+  </div>
 
-      <Card.Body className="d-flex flex-column">
-        <div style={cardStyles.titleRow}>
-          <div>
-            <h6 className="mb-0 text-uppercase">{pkg.title}</h6>
-            <small className="text-muted">{pkg.description}</small>
-          </div>
-          <div className="text-end">
-            {pkg.is_home && <Badge bg="info" className="mb-1">Home</Badge>}
-            {pkg.is_freezone && <Badge bg="secondary" className="mb-1 ms-1">Freezone</Badge>}
-          </div>
-        </div>
+  {/* ================= BODY ================= */}
+  <Card.Body
+    className="px-4 d-flex flex-column"
+    style={{ paddingTop: 70 }}
+  >
+    {/* TITLE + BADGES */}
+    <div className="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h5 className="fw-bold mb-1">{pkg.title}</h5>
+        <small className="text-muted">
+          {pkg.description}
+        </small>
+      </div>
 
-        <div className="mt-3">
-          <div style={cardStyles.price}>
-            {currency}{pkg.amount}
-            <span className="text-muted" style={{ fontSize: 14, fontWeight: 500 }}></span>
-          </div>
+      <div className="text-end">
+        {pkg.is_home && (
+          <span className="badge rounded-pill bg-info mb-1">
+            Home
+          </span>
+        )}
+        {pkg.is_freezone && (
+          <span className="badge rounded-pill bg-dark ms-1">
+            Freezone
+          </span>
+        )}
+      </div>
+    </div>
 
-          <hr />
+    {/* PRICE */}
+    <div
+      style={{
+        background: "#f8f9fa",
+        borderRadius: 14,
+        padding: "14px 16px",
+        marginBottom: 18,
+      }}
+    >
+      <div className="text-muted small">Starting from</div>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 800,
+          color: "#0d6efd",
+        }}
+      >
+        {currency}
+        {pkg.amount}
+      </div>
+    </div>
 
-          <ul style={cardStyles.pointsList}>
-            {points.length ? points.map((pt, i) => (
-              <li key={i} className="text-dark small">
-                <IconifyIcon icon="bx:check-circle" className="text-primary me-2" />{pt}
-              </li>
-            )) : <li className="text-muted small">No features listed</li>}
-          </ul>
-        </div>
+    {/* FEATURES */}
+    <ul className="list-unstyled mb-4">
+      {points.length ? (
+        points.map((pt, i) => (
+          <li
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 10,
+              fontSize: 14,
+            }}
+          >
+            <IconifyIcon
+              icon="bx:check"
+              className="me-2 text-success"
+            />
+            {pt}
+          </li>
+        ))
+      ) : (
+        <li className="text-muted small">
+          No features listed
+        </li>
+      )}
+    </ul>
 
-        <div style={cardStyles.actionRow}>
-          <Button variant="outline-primary" size="sm" onClick={() => onEdit(pkg)}>Edit</Button>
-          <Button variant="outline-danger" size="sm" onClick={() => onDelete(pkg)}>Delete</Button>
-        </div>
-      </Card.Body>
-    </Card>
+    {/* ACTIONS */}
+    <div
+      style={{
+        marginTop: "auto",
+        display: "flex",
+        gap: 12,
+      }}
+    >
+      <Button
+        variant="primary"
+        size="sm"
+        className="w-100"
+        onClick={() => onEdit(pkg)}
+      >
+        Edit
+      </Button>
+      <Button
+        variant="outline-danger"
+        size="sm"
+        className="w-100"
+        onClick={() => onDelete(pkg)}
+      >
+        Delete
+      </Button>
+    </div>
+  </Card.Body>
+</Card>
+
   );
 };
 
@@ -688,6 +805,7 @@ const Packages = () => {
   /* ---------------- Tabs ---------------- */
   const [topActiveKey, setTopActiveKey] = useState("common");
   const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteCommonPackage, setDeleteCommonPackage] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState([])
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -760,27 +878,55 @@ const Packages = () => {
   const handleSubmitCommon = async data => {
     setFetching(true);
     try {
+            let res;
+
       if (data.id) {
-        await updateCommonPackage(data.id, data);
+       res= await updateCommonPackage(data.id, data);
       } else {
-        await createCommonPackage(data);
+       res= await createCommonPackage(data);
       }
       await fetchCommon();
+      if(res.success){
+        toast.success(res.message)
+      }
     } finally {
       setFetching(false);
     }
   };
 
   const handleDeleteCommon = async pkg => {
-    if (!window.confirm(`Delete "${pkg.title}"?`)) return;
-    setFetching(true);
-    try {
-      await deleteCommonPackage(pkg._id);
-      await fetchCommon();
-    } finally {
-      setFetching(false);
-    }
+    setDeleteCommonPackage(true)
+    setSelectedPackage(pkg)
+    // setFetching(true);
+    // try {
+    //   await deleteCommonPackage(pkg._id);
+    //   await fetchCommon();
+    // } finally {
+    //   setFetching(false);
+    // }
   };
+ const confirmDeletePackage = async () => {
+  try {
+    setIsDeleting(true);
+
+    const res = await deleteCommonpackage(selectedPackage._id);
+
+    if (res.success) {
+      setCommonPackages((prev) =>
+        prev.filter((pkg) => pkg._id !== selectedPackage._id)
+      );
+
+      toast.success(res.message);
+      setDeleteCommonPackage(false);
+    }
+  } catch (error) {
+    toast.error(error?.message || "Failed to delete package");
+  } finally {
+    setIsDeleting(false);
+  }
+};
+
+
 
   /* ================= STATIC CATEGORY HANDLERS ================= */
   const handleSelectPage = page => {
@@ -1104,84 +1250,178 @@ const Packages = () => {
 
               {/* PACKAGES LIST */}
               <Row className="g-3">
-                {currentItemPackages.length > 0 ? (
-                  currentItemPackages.map(pkg => (
-                    <Col md={4} key={pkg.id}>
-                      <Card style={cardStyles.card} className="h-100">
-                        {pkg.image ? (
-                          <div style={cardStyles.imgWrapper}>
-                            <img
-                              src={pkg.image}
-                              alt={pkg.title}
-                              loading="lazy"
-                              style={cardStyles.img}
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            style={{
-                              ...cardStyles.imgWrapper,
-                              fontSize: 20,
-                              color: "#6c757d",
-                            }}
-                            className="d-flex align-items-center justify-content-center"
-                          >
-                            <IconifyIcon icon="bx:image" className="fs-2" />
-                          </div>
-                        )}
+  {currentItemPackages.length > 0 ? (
+    currentItemPackages.map(pkg => (
+      <Col md={4} key={pkg.id}>
+        <Card
+          className="h-100 border-0 overflow-hidden"
+          style={{
+            borderRadius: 20,
+            boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
+            transition: "all 0.35s ease",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "scale(1.02)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "scale(1)")
+          }
+        >
+          {/* ================= HEADER ================= */}
+          <div
+            style={{
+              height: 110,
+              background: "linear-gradient(135deg, #1e293b, #0f172a)",
+              position: "relative",
+            }}
+          >
+            {/* IMAGE / ICON */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: -45,
+                left: 24,
+                width: 90,
+                height: 90,
+                borderRadius: "50%",
+                background: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 22px rgba(0,0,0,0.18)",
+                overflow: "hidden",
+              }}
+            >
+              {pkg.image ? (
+                <img
+                  src={pkg.image}
+                  alt={pkg.title}
+                  loading="lazy"
+                  style={{
+                    width: 55,
+                    height: 55,
+                    objectFit: "contain",
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <IconifyIcon
+                  icon="bx:image"
+                  style={{ fontSize: 36 }}
+                  className="text-primary"
+                />
+              )}
+            </div>
+          </div>
 
+          {/* ================= BODY ================= */}
+          <Card.Body
+            className="px-4 d-flex flex-column"
+            style={{ paddingTop: 70 }}
+          >
+            {/* TITLE */}
+            <div className="mb-3">
+              <h6 className="mb-1 fw-bold text-uppercase">
+                {pkg.title}
+              </h6>
+              <small className="text-muted">
+                {pkg.description}
+              </small>
+            </div>
 
-                        <Card.Body className="d-flex flex-column">
-                          <div style={cardStyles.titleRow}>
-                            <div>
-                              <h6 className="mb-0 text-uppercase">{pkg.title}</h6>
-                              <small className="text-muted">{pkg.description}</small>
-                            </div>
-                          </div>
+            {/* PRICE */}
+            <div
+              style={{
+                background: "#f8f9fa",
+                borderRadius: 14,
+                padding: "14px 16px",
+                marginBottom: 16,
+              }}
+            >
+              <div className="text-muted small">Starting from</div>
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 800,
+                  color: "#0d6efd",
+                }}
+              >
+                {currency}
+                {pkg.amount}
+              </div>
+            </div>
 
-                          <div className="mt-3">
-                            <div style={cardStyles.price}>
-                              {currency}
-                              {pkg.amount}
-                            </div>
+            <hr className="my-2" />
 
-                            <hr />
+            {/* FEATURES */}
+            <ul className="list-unstyled mb-4">
+              {Array.isArray(pkg.points) && pkg.points.length > 0 ? (
+                pkg.points.map((pt, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 8,
+                      fontSize: 14,
+                    }}
+                  >
+                    <IconifyIcon
+                      icon="bx:check"
+                      className="me-2 text-success"
+                    />
+                    {pt}
+                  </li>
+                ))
+              ) : (
+                <li className="text-muted small">
+                  No features listed
+                </li>
+              )}
+            </ul>
 
-                            <ul style={cardStyles.pointsList}>
-                              {Array.isArray(pkg.points) && pkg.points.length > 0 ? (
-                                pkg.points.map((pt, i) => (
-                                  <li key={i} className="text-dark small">
-                                    <IconifyIcon
-                                      icon="bx:check-circle"
-                                      className="text-primary me-2"
-                                    />
-                                    {pt}
-                                  </li>
-                                ))
-                              ) : (
-                                <li className="text-muted small">No features listed</li>
-                              )}
+            {/* ACTIONS */}
+            <div
+              style={{
+                marginTop: "auto",
+                display: "flex",
+                gap: 12,
+              }}
+            >
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-100"
+                onClick={() => handleOpenCategoryEdit(pkg)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="w-100"
+                onClick={() => {
+                  setDeleteModal(true);
+                  setSelectedPackage(pkg);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+    ))
+  ) : (
+    <Col>
+      <p className="text-muted mb-0">No packages added yet.</p>
+    </Col>
+  )}
+</Row>
 
-                            </ul>
-                          </div>
-
-                          <div style={cardStyles.actionRow}>
-                            <Button variant="outline-primary" size="sm" onClick={() => handleOpenCategoryEdit(pkg)}>Edit</Button>
-                            <Button variant="outline-danger" size="sm" onClick={() => { setDeleteModal(true), setSelectedPackage(pkg) }}>Delete</Button>
-                          </div>                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))
-                ) : (
-                  <Col>
-                    <p className="text-muted mb-0">No packages added yet.</p>
-                  </Col>
-                )}
-              </Row>
 
             </Col>
           </Row>
@@ -1210,6 +1450,13 @@ const Packages = () => {
           confirmDelete={confirmDelete}
           isDeleting={isDeleting}
           handleModal={() => setDeleteModal(false)}
+        />
+      )}
+      {deleteCommonPackage && (
+        <DeleteConfrimModal
+          confirmDelete={confirmDeletePackage}
+          isDeleting={isDeleting}
+          handleModal={() => setDeleteCommonPackage(false)}
         />
       )}
     </>
