@@ -216,7 +216,7 @@ const isDark = theme === "dark";
   </Card.Body>
 </Card>
 
-<Card className="mt-4">
+{/* <Card className="mt-4">
   <Card.Body>
     <h5 className="mb-3">
       <IconifyIcon icon="bx:bell" className="me-2 text-primary" />
@@ -251,7 +251,7 @@ const isDark = theme === "dark";
       </Col>
     </Row>
   </Card.Body>
-</Card>
+</Card> */}
 
       {/* Storage Usage */}
 <Card>
