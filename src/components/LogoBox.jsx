@@ -5,17 +5,54 @@ import logoSm from '@/assets/images/logo-sm.png';
 const LogoBox = ({
   containerClassName,
   squareLogo,
-  textLogo
+  textLogo,style
 }) => {
-  return <div className={containerClassName ?? ''}>
-      <Link to="/" className="logo-dark">
-        <img src={logoSm} className={squareLogo?.className} height={squareLogo?.height ?? 30} width={squareLogo?.width ?? 19} alt="logo sm" />
-        <img src={logoDark} className={textLogo?.className} height={textLogo?.height ?? 20} width={textLogo?.width ?? 60} alt="logo dark" />
-      </Link>
-      <Link to="/" className="logo-light">
-        <img src={logoSm} className={squareLogo?.className} height={squareLogo?.height ?? 30} width={squareLogo?.width ?? 19} alt="logo sm" />
-        <img src={logoLight} className={textLogo?.className} height={textLogo?.height ?? 20} width={textLogo?.width ?? 60} alt="logo light" />
-      </Link>
+  return <div className={containerClassName ?? ''}  style={{
+        backgroundColor: "#22282e",
+        padding: "12px",
+        ...style,
+      }}>
+<Link to="/" className="logo-dark">
+  <img
+    src="/public/ADL- D.png"
+    style={{
+          width: 50,
+      height: 50,
+      objectFit: "fit",
+    }}
+    alt="logo sm"
+  />
+  <img
+    src="/public/ADL Business.png"
+    style={{
+      width: 100,
+      height: 100,
+      objectFit: "contain",
+    }}
+    alt="logo dark"
+  />
+</Link>
+
+<Link to="/" className="logo-light">
+  <img
+    src="/public/ADL- D.png"
+    style={{
+      width: 50,
+      height: 50,
+      objectFit: "fit",
+    }}
+    alt="logo sm"
+  />
+  <img
+    src="/public/ADL Business.png"
+    style={{
+      width: 100,
+      height: 100,
+      objectFit: "contain",
+    }}
+    alt="logo light"
+  />
+</Link>
     </div>;
 };
 export default LogoBox;

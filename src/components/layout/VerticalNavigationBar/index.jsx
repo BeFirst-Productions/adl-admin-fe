@@ -34,7 +34,9 @@ const VerticalNavigationBar = () => {
   return (
     <div className="main-nav" id="leftside-menu-container">
       <LogoBox
-        containerClassName="logo-box"
+        containerClassName="logo-box "
+          style={{ color: "#22282e" }}
+
         squareLogo={{ className: 'logo-sm' }}
         textLogo={{ className: 'logo-lg' }}
       />

@@ -7,6 +7,7 @@ import { Col, Row, Card, Button } from 'react-bootstrap';
 import { forwardRef, useState, useEffect } from 'react';
 import { getSeo, saveSeo } from '@/api/apis';
 import { toast } from 'react-toastify';
+import PageMetaData from '@/components/PageTitle';
 
 // =============================
 // SERVICES LIST (already done earlier)
@@ -254,6 +255,8 @@ const SeoLayout = forwardRef((props, ref) => {
 
       {/* PAGE SELECTION */}
       <Card className="shadow-sm mb-4">
+              <PageMetaData title="Seo" />
+
         <Card.Body>
           <h5 className="mb-3">Page Selection</h5>
 

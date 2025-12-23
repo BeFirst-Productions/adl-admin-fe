@@ -15,6 +15,7 @@ import {
 import IconifyIcon from '@/components/wrappers/IconifyIcon';
 import { toast } from 'react-toastify';
 import { deleteEnquiries, getEnquiries } from '@/api/apis';
+import PageMetaData from '@/components/PageTitle';
 
 const EnquiryManagement = () => {
     const [enquiries, setEnquiries] = useState([]);
@@ -246,6 +247,8 @@ const EnquiryManagement = () => {
     return (
         <>
             <Row>
+                      <PageMetaData title="Enquiry" />
+
                 <Col xs={12}>
                     <Card>
                         <CardBody>

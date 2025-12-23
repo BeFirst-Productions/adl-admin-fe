@@ -17,7 +17,7 @@ const Sellers = () => {
   }, []);
   return <>
     <PageBreadcrumb subName="Users" title="Users List" />
-    <PageMetaData title="Sellers" />
+    <PageMetaData title="User Management" />
     {users && <SellersList users={users} />}
   </>;
 };
