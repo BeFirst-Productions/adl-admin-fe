@@ -13,6 +13,7 @@ const BlogCard = ({ post, onDelete, onEdit, onView }) => {
 
   return (
     <Card className="h-100 shadow-sm border-0">
+      
       <CardBody>
         <div className="text-center">
 

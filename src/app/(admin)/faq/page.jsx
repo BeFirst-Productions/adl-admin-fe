@@ -22,6 +22,7 @@ import {
   getFaqs,
 } from "@/api/apis";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import PageMetaData from "@/components/PageTitle";
 
 const FAQManagement = () => {
   const [faqs, setFaqs] = useState([]);
@@ -289,6 +290,8 @@ const FAQManagement = () => {
   return (
     <>
       <Row>
+              <PageMetaData title="Faqs" />
+
         <Col xs={12}>
           <Card>
             <CardBody>
