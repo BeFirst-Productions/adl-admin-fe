@@ -7,23 +7,19 @@ const LogoBox = ({
   squareLogo,
   textLogo,style
 }) => {
-  return <div className={containerClassName ?? ''}  style={{
-        backgroundColor: "#22282e",
-        padding: "12px",
-        ...style,
-      }}>
+  return <div className={containerClassName ?? ''}  >
 <Link to="/" className="logo-dark">
-  <img
-    src="/public/ADL- D.png"
+  {/* <img
+    src="/ADL- D.png"
     style={{
           width: 50,
       height: 50,
       objectFit: "fit",
     }}
     alt="logo sm"
-  />
+  /> */}
   <img
-    src="/public/ADL Business.png"
+    src="/ADL.png"
     style={{
       width: 100,
       height: 100,
@@ -34,17 +30,17 @@ const LogoBox = ({
 </Link>
 
 <Link to="/" className="logo-light">
-  <img
-    src="/public/ADL- D.png"
+  {/* <img
+    src="/ADL- D.png"
     style={{
       width: 50,
       height: 50,
       objectFit: "fit",
     }}
     alt="logo sm"
-  />
+  /> */}
   <img
-    src="/public/ADL Business.png"
+    src="/ADL Business.png"
     style={{
       width: 100,
       height: 100,
