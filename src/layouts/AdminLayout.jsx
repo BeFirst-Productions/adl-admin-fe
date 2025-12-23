@@ -14,7 +14,7 @@ const AdminLayout = ({
 
       <Suspense fallback={<FallbackLoading />}>
         <VerticalNavigationBar />
-      </Suspense>
+      </Suspense>   
 
       <div className="page-content">
         <div className="container-xxl">
